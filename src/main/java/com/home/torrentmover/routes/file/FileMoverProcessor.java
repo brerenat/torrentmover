@@ -13,9 +13,11 @@ import org.slf4j.LoggerFactory;
 
 public class FileMoverProcessor implements Processor {
 
+	private static final String EPISODEREGEX = "S\\d{1,}E\\d{1,}";
+
 	private static final Logger LOG = LoggerFactory.getLogger(FileMoverProcessor.class);
 
-	private static final Pattern EPISODEPATTERN = Pattern.compile("S\\d{1,}E\\d{1,}", Pattern.CASE_INSENSITIVE);
+	private static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX, Pattern.CASE_INSENSITIVE);
 	private final String movies;
 	private final String series;
 
@@ -33,29 +35,57 @@ public class FileMoverProcessor implements Processor {
 		LOG.info("Body :" + body.getFileNameOnly());
 		final File source = new File(body.getAbsoluteFilePath());
 		final Matcher nameMatcher = EPISODEPATTERN.matcher(body.getFileNameOnly());
+		final String ext = body.getFileNameOnly().substring(body.getFileNameOnly().lastIndexOf('.'));
+		final String fileName = body.getFileNameOnly().substring(0, body.getFileNameOnly().lastIndexOf('.'));
+		File destination = null;
 		if (nameMatcher.find()) {
-			
-			source.renameTo(new File(series + body.getFileNameOnly()));
+			String seriesName = fileName.split(EPISODEREGEX)[0].replace('.', ' ').replace('_', ' ').replaceAll("\\[(.*?)\\]", "").replaceAll("\\((.*?)\\)", "").trim();
+			final File seriesDir = new File(series);
+			LOG.info("Series Name :" + seriesName);
+			File seriesFolderFound = null;
+			for (final File dir : seriesDir.listFiles()) {
+				if (dir.isDirectory() && (dir.getName().equalsIgnoreCase(seriesName) || dir.getName().contains(seriesName))) {
+					seriesFolderFound = dir;
+					seriesName = dir.getName();
+				}
+			}
+			if (seriesFolderFound == null) {
+				final File newDir = new File(series + seriesName);
+				newDir.mkdir();
+				destination = new File(newDir.getAbsolutePath() + "/" + fileName + ext);
+				source.renameTo(destination);
+			} else {
+				LOG.info("Found Series Folder");
+				destination = new File(seriesFolderFound.getAbsolutePath() + "/" + seriesName + " " + nameMatcher.group() + ext);
+				source.renameTo(destination);
+			}
 		} else {
-			source.renameTo(new File(movies + body.getFileNameOnly()));
+			destination = new File(movies + fileName.replace('.', ' ').replace('_', ' ').replaceAll("\\[(.*?)\\]", "").replaceAll("\\((.*?)\\)", "") + ext);
+			source.renameTo(destination);
 		}
 
 		final File parentDir = source.getParentFile();
+		LOG.info("Parent Dir :" + parentDir.getAbsoluteFile());
 		final File[] files = parentDir.listFiles(new ExtensionFilter());
+		LOG.info("Number of Files :" + files.length);
 		if (files.length == 0) {
-			emptyParent(parentDir.listFiles());
+			File[] fileArr = new File[parentDir.listFiles().length + 1];
+			fileArr[parentDir.listFiles().length] = parentDir;
+			emptyParent(fileArr);
 		}
 
-		LOG.info("New File Name :" + source.getPath());
+		LOG.info("New File Name :" + destination.getAbsoluteFile());
 	}
 
 	private void emptyParent(final File[] files) {
 		for (final File file : files) {
-			if (file.isDirectory()) {
+			LOG.info("File To Check :" + file.getAbsoluteFile());
+			if (file.isDirectory() && file.listFiles().length > 0) {
+				LOG.info("Is not empty Dir");
 				emptyParent(file.listFiles());
-			} else {
-				file.delete();
 			}
+			LOG.info("Deleting :" + file.getAbsoluteFile());
+			file.delete();
 		}
 	}
 
