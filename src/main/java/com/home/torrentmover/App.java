@@ -55,7 +55,6 @@ public class App {
             	Thread.sleep(100);
             }
             LOG.info("Camel Started :" + main.isStarted());
-            Thread.sleep(300000L);
 		} catch (Exception e) {
 			LOG.error(e.getClass().getName() + " when Running FileMover Route", e);
 		}
