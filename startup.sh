@@ -1,1 +1,1 @@
-java -jar torrentmover.jar &
+nohup java -jar torrentmover.jar &

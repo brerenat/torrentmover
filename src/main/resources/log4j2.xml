@@ -6,7 +6,7 @@
 				pattern="%d{dd-MM-yyyy HH:mm:ss} %-5level %logger{36} - %msg%n" />
 		</Console>
 		<RollingFile name="MyFile" fileName="torrentmover.log"
-			fileNamePattern="torrentmover.%i.log" ignoreExceptions="false">
+			filePattern="torrentmover.%i.log" ignoreExceptions="false">
 			<PatternLayout
 				pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5level %logger{36} - %msg%n" />
 			<Policies>

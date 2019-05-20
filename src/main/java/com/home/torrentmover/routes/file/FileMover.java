@@ -10,17 +10,19 @@ public class FileMover extends RouteBuilder {
 	private static final Logger LOG = LoggerFactory.getLogger(FileMover.class);
 	private final String movies;
 	private final String series;
+	private final String source;
 	
-	public FileMover(final String from, final String movies, final String series) {
+	public FileMover(final String from, final String movies, final String series, final String source) {
 		this.from = from;
 		this.movies = movies;
 		this.series = series;
+		this.source = source;
 	}
 	
 	@Override
 	public void configure() throws Exception {
 		LOG.info("Starting Configure");
-		from(from).process(new FileMoverProcessor(movies, series)).end();
+		from(from).process(new FileMoverProcessor(movies, series, source)).end();
 	}
 
 }

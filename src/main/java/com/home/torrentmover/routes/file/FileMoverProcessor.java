@@ -20,11 +20,13 @@ public class FileMoverProcessor implements Processor {
 	private static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX, Pattern.CASE_INSENSITIVE);
 	private final String movies;
 	private final String series;
+	private final String source;
 
-	public FileMoverProcessor(final String movies, final String series) {
+	public FileMoverProcessor(final String movies, final String series, final String source) {
 		super();
 		this.movies = movies;
 		this.series = series;
+		this.source = source;
 	}
 
 	@Override
@@ -33,7 +35,12 @@ public class FileMoverProcessor implements Processor {
 		final GenericFile<?> body = exchange.getIn().getBody(GenericFile.class);
 
 		LOG.info("Body :" + body.getFileNameOnly());
-		final File source = new File(body.getAbsoluteFilePath());
+		File source = new File(body.getAbsoluteFilePath());
+		while (!source.canWrite()) {
+			Thread.sleep(1000L);
+			source = new File(body.getAbsoluteFilePath());
+		}
+		
 		final Matcher nameMatcher = EPISODEPATTERN.matcher(body.getFileNameOnly());
 		final String ext = body.getFileNameOnly().substring(body.getFileNameOnly().lastIndexOf('.'));
 		final String fileName = body.getFileNameOnly().substring(0, body.getFileNameOnly().lastIndexOf('.'));
@@ -84,8 +91,10 @@ public class FileMoverProcessor implements Processor {
 				LOG.info("Is not empty Dir");
 				emptyParent(file.listFiles());
 			}
-			LOG.info("Deleting :" + file.getAbsoluteFile());
-			file.delete();
+			if (!file.getAbsolutePath().equals(source) && !(file.getAbsolutePath() + "/").equals(source)) {
+				LOG.info("Deleting :" + file.getAbsoluteFile());
+				file.delete();
+			}
 		}
 	}
 
