@@ -13,11 +13,12 @@ import org.slf4j.LoggerFactory;
 
 public class FileMoverProcessor implements Processor {
 
-	private static final String EPISODEREGEX = "S\\d{1,}E\\d{1,}";
-
+	private static final String EPISODEREGEX = "[Ss]\\d{1,}[Ee]\\d{1,}";
+	private static final String MOVIEREGEX = "( \\d{4} )";
 	private static final Logger LOG = LoggerFactory.getLogger(FileMoverProcessor.class);
 
-	private static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX, Pattern.CASE_INSENSITIVE);
+	private static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
+	private static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX);
 	private final String movies;
 	private final String series;
 	private final String source;
@@ -59,15 +60,22 @@ public class FileMoverProcessor implements Processor {
 			if (seriesFolderFound == null) {
 				final File newDir = new File(series + seriesName);
 				newDir.mkdir();
-				destination = new File(newDir.getAbsolutePath() + "/" + fileName + ext);
+				destination = new File(newDir.getAbsolutePath() + "/" + seriesName + " " + nameMatcher.group().toUpperCase() + ext);
 				source.renameTo(destination);
 			} else {
 				LOG.info("Found Series Folder");
-				destination = new File(seriesFolderFound.getAbsolutePath() + "/" + seriesName + " " + nameMatcher.group() + ext);
+				destination = new File(seriesFolderFound.getAbsolutePath() + "/" + seriesName + " " + nameMatcher.group().toUpperCase() + ext);
 				source.renameTo(destination);
 			}
 		} else {
-			destination = new File(movies + fileName.replace('.', ' ').replace('_', ' ').replaceAll("\\[(.*?)\\]", "").replaceAll("\\((.*?)\\)", "") + ext);
+			String newFileName = fileName.replace('.', ' ').replace('_', ' ').replaceAll("\\[(.*?)\\]", "").replaceAll("\\((.*?)\\)", "");
+			final Matcher matches = MOVIEPATTERN.matcher(newFileName);
+			if (matches.find()) {
+				LOG.info("Found Year String");
+				newFileName = (newFileName.split(MOVIEREGEX)[0] + matches.group()).trim();
+				LOG.info("New File Name :" + newFileName);
+			}
+			destination = new File(movies + newFileName + ext);
 			source.renameTo(destination);
 		}
 
@@ -86,14 +94,16 @@ public class FileMoverProcessor implements Processor {
 
 	private void emptyParent(final File[] files) {
 		for (final File file : files) {
-			LOG.info("File To Check :" + file.getAbsoluteFile());
-			if (file.isDirectory() && file.listFiles().length > 0) {
-				LOG.info("Is not empty Dir");
-				emptyParent(file.listFiles());
-			}
-			if (!file.getAbsolutePath().equals(source) && !(file.getAbsolutePath() + "/").equals(source)) {
-				LOG.info("Deleting :" + file.getAbsoluteFile());
-				file.delete();
+			LOG.info("File To Check :" + file);
+			if (file != null) {
+				if (file.isDirectory() && file.listFiles().length > 0) {
+					LOG.info("Is not empty Dir");
+					emptyParent(file.listFiles());
+				}
+				if (!file.getAbsolutePath().equals(source) && !(file.getAbsolutePath() + "/").equals(source)) {
+					LOG.info("Deleting :" + file.getAbsoluteFile());
+					file.delete();
+				}
 			}
 		}
 	}
