@@ -13,8 +13,10 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<camel.version>2.24.0</camel.version>
+		<spring.version>2.1.5.RELEASE</spring.version>
 	</properties>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -27,7 +29,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>com.home.torrentmover.App</mainClass>
+							<mainClass>com.home.torrentmover.SpringStart</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -37,7 +39,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.0.0</version>
-				<configuration/>
+				<configuration />
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -63,18 +65,44 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-core</artifactId>
-			<version>2.24.0</version>
+			<version>${camel.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-slf4j-impl -->
+		<!-- https://mvnrepository.com/artifact/org.apache.camel/camel-mail -->
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<version>2.11.2</version>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-mail</artifactId>
+			<version>${camel.version}</version>
 		</dependency>
 
-		<!-- <dependency> <groupId>com.home</groupId> <artifactId>filescrubber</artifactId> 
-			<version>0.0.1</version> </dependency> -->
+		<!-- https://mvnrepository.com/artifact/org.apache.camel/camel-spring-boot-starter -->
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-spring-boot-starter</artifactId>
+			<version>${camel.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-undertow</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.26</version>
+		</dependency>
+
 
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>

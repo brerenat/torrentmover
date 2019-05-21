@@ -2,6 +2,7 @@ package com.home.torrentmover.routes.file;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,6 +11,8 @@ import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.home.torrentmover.SpringStart;
 
 public class FileMoverProcessor implements Processor {
 
@@ -23,14 +26,13 @@ public class FileMoverProcessor implements Processor {
 	private final String series;
 	private final String source;
 
-	public FileMoverProcessor(final String movies, final String series, final String source) {
+	public FileMoverProcessor() {
 		super();
-		this.movies = movies;
-		this.series = series;
-		this.source = source;
+		this.movies = SpringStart.prop.getProperty("movies");
+		this.series = SpringStart.prop.getProperty("series");
+		this.source = SpringStart.prop.getProperty("source");
 	}
 
-	@Override
 	public void process(final Exchange exchange) throws Exception {
 		LOG.info("Starting to move File");
 		final GenericFile<?> body = exchange.getIn().getBody(GenericFile.class);
@@ -41,18 +43,20 @@ public class FileMoverProcessor implements Processor {
 			Thread.sleep(1000L);
 			source = new File(body.getAbsoluteFilePath());
 		}
-		
+
 		final Matcher nameMatcher = EPISODEPATTERN.matcher(body.getFileNameOnly());
 		final String ext = body.getFileNameOnly().substring(body.getFileNameOnly().lastIndexOf('.'));
 		final String fileName = body.getFileNameOnly().substring(0, body.getFileNameOnly().lastIndexOf('.'));
 		File destination = null;
 		if (nameMatcher.find()) {
-			String seriesName = fileName.split(EPISODEREGEX)[0].replace('.', ' ').replace('_', ' ').replaceAll("\\[(.*?)\\]", "").replaceAll("\\((.*?)\\)", "").trim();
+			String seriesName = fileName.split(EPISODEREGEX)[0].replace('.', ' ').replace('_', ' ')
+					.replaceAll("\\[(.*?)\\]", "").replaceAll("\\((.*?)\\)", "").trim();
 			final File seriesDir = new File(series);
 			LOG.info("Series Name :" + seriesName);
 			File seriesFolderFound = null;
 			for (final File dir : seriesDir.listFiles()) {
-				if (dir.isDirectory() && (dir.getName().equalsIgnoreCase(seriesName) || dir.getName().contains(seriesName))) {
+				if (dir.isDirectory()
+						&& (dir.getName().equalsIgnoreCase(seriesName) || dir.getName().contains(seriesName))) {
 					seriesFolderFound = dir;
 					seriesName = dir.getName();
 				}
@@ -60,15 +64,18 @@ public class FileMoverProcessor implements Processor {
 			if (seriesFolderFound == null) {
 				final File newDir = new File(series + seriesName);
 				newDir.mkdir();
-				destination = new File(newDir.getAbsolutePath() + "/" + seriesName + " " + nameMatcher.group().toUpperCase() + ext);
+				destination = new File(
+						newDir.getAbsolutePath() + "/" + seriesName + " " + nameMatcher.group().toUpperCase() + ext);
 				source.renameTo(destination);
 			} else {
 				LOG.info("Found Series Folder");
-				destination = new File(seriesFolderFound.getAbsolutePath() + "/" + seriesName + " " + nameMatcher.group().toUpperCase() + ext);
+				destination = new File(seriesFolderFound.getAbsolutePath() + "/" + seriesName + " "
+						+ nameMatcher.group().toUpperCase() + ext);
 				source.renameTo(destination);
 			}
 		} else {
-			String newFileName = fileName.replace('.', ' ').replace('_', ' ').replaceAll("\\[(.*?)\\]", "").replaceAll("\\((.*?)\\)", "");
+			String newFileName = fileName.replace('.', ' ').replace('_', ' ').replaceAll("\\[(.*?)\\]", "")
+					.replaceAll("\\((.*?)\\)", "");
 			final Matcher matches = MOVIEPATTERN.matcher(newFileName);
 			if (matches.find()) {
 				LOG.info("Found Year String");
@@ -90,6 +97,10 @@ public class FileMoverProcessor implements Processor {
 		}
 
 		LOG.info("New File Name :" + destination.getAbsoluteFile());
+
+		final String result = EmailMessageFormatter.getHTMLMessage(Arrays.asList("</br>From :<p>"
+				+ source.getAbsolutePath() + "</p></br>To :<p>" + destination.getAbsolutePath() + "</p>"));
+		exchange.getOut().setBody(result);
 	}
 
 	private void emptyParent(final File[] files) {
