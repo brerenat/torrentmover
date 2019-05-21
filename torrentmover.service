@@ -1,0 +1,10 @@
+[Unit]
+Description=Torrent Mover Service
+
+[Service]
+Type=forking
+ExecStart=nohup /apps/torrentmover/startup.sh &
+WorkingDirectory=/apps/torrentmover/
+
+[Install]
+WantedBy=multi-user.target
