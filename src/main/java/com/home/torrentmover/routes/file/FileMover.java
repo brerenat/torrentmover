@@ -13,9 +13,6 @@ public class FileMover extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		LOG.info("Starting Configure");
-		LOG.info("Source :${source}");
-		LOG.info("Movies :${movies}");
-		LOG.info("Series :${series}");
 		from("file:{{source}}?recursive=true&noop=true&include={{file.formats}}").process(new FileMoverProcessor()).to(
 				"smtps://{{email.smtp}}?username={{email.sender}}&password={{email.password}}&from={{email.sender}}&to={{email.to}}&subject={{email.subject}}&contentType=text/html")
 				.end();
