@@ -3,8 +3,11 @@ package com.home.torrentmover.routes.file;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.persistence.EntityManager;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -13,12 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.home.torrentmover.SpringStart;
+import com.home.torrentmover.model.FileType;
+import com.home.torrentmover.model.ProcessedFile;
 
 public class FileMoverProcessor implements Processor {
 
 	private static final String EPISODEREGEX = "[Ss]\\d{1,}[Ee]\\d{1,}";
 	private static final String MOVIEREGEX = "( \\d{4} )";
 	private static final Logger LOG = LoggerFactory.getLogger(FileMoverProcessor.class);
+
+	private static final String MOVIE = "Movie";
+	private static final String SERIES = "Series";
 
 	private static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
 	private static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX);
@@ -48,7 +56,9 @@ public class FileMoverProcessor implements Processor {
 		final String ext = body.getFileNameOnly().substring(body.getFileNameOnly().lastIndexOf('.'));
 		final String fileName = body.getFileNameOnly().substring(0, body.getFileNameOnly().lastIndexOf('.'));
 		File destination = null;
+		final String fileTypeStr;
 		if (nameMatcher.find()) {
+			fileTypeStr = SERIES;
 			String seriesName = fileName.split(EPISODEREGEX)[0].replace('.', ' ').replace('_', ' ')
 					.replaceAll("\\[(.*?)\\]", "").replaceAll("\\((.*?)\\)", "").trim();
 			final File seriesDir = new File(series);
@@ -74,6 +84,7 @@ public class FileMoverProcessor implements Processor {
 				source.renameTo(destination);
 			}
 		} else {
+			fileTypeStr = MOVIE;
 			String newFileName = fileName.replace('.', ' ').replace('_', ' ').replaceAll("\\[(.*?)\\]", "")
 					.replaceAll("\\((.*?)\\)", "");
 			final Matcher matches = MOVIEPATTERN.matcher(newFileName);
@@ -97,6 +108,22 @@ public class FileMoverProcessor implements Processor {
 		}
 
 		LOG.info("New File Name :" + destination.getAbsoluteFile());
+
+		final ProcessedFile procFile = new ProcessedFile();
+		procFile.setDateProcessed(new Date());
+		procFile.setFileName(destination.getAbsolutePath());
+
+		final FileType fileType = new FileType();
+		fileType.setType(fileTypeStr);
+
+		procFile.setFileType(fileType);
+
+		final EntityManager em = SpringStart.getEntityManager();
+
+		em.getTransaction().begin();
+		em.persist(fileType);
+		em.persist(procFile);
+		em.getTransaction().commit();
 
 		final String result = EmailMessageFormatter.getHTMLMessage(Arrays.asList("</br>From :<p>"
 				+ source.getAbsolutePath() + "</p></br>To :<p>" + destination.getAbsolutePath() + "</p>"));
