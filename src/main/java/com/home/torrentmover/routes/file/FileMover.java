@@ -14,7 +14,7 @@ public class FileMover extends RouteBuilder {
 	public void configure() throws Exception {
 		LOG.info("Starting Configure");
 		from("file:{{source}}?recursive=true&noop=true&include={{file.formats}}").process(new FileMoverProcessor()).to(
-				"smtps://{{email.smtp}}?username={{email.sender}}&password={{email.password}}&from={{email.sender}}&to={{email.to}}&subject={{email.subject}}&contentType=text/html")
+				"smtps://{{email.smtp}}:{{email.port}}?username={{email.sender}}&password={{email.password}}&from={{email.sender}}&to={{email.to}}&subject={{email.subject}}&contentType=text/html")
 				.end();
 	}
 

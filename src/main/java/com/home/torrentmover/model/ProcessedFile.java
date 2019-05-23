@@ -5,18 +5,20 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NoResultException;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@Table(name = "ProcessedFiles")
+@Table(name = "ProcessedFile")
 public class ProcessedFile {
 
 	@Id
@@ -26,7 +28,7 @@ public class ProcessedFile {
 	private String fileName;
 	@Temporal(value = TemporalType.TIMESTAMP)
 	private Date dateProcessed;
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "fileTypeId", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_FileType"))
 	private FileType fileType;
 
@@ -60,6 +62,11 @@ public class ProcessedFile {
 
 	public void setFileType(FileType fileType) {
 		this.fileType = fileType;
+	}
+
+	public static ProcessedFile findWithName(EntityManager em, String name) throws NoResultException {
+		return em.createQuery("SELECT pf FROM ProcessedFile pf WHERE pf.fileName = :fileName", ProcessedFile.class)
+				.setParameter("fileName", name).getSingleResult();
 	}
 
 }

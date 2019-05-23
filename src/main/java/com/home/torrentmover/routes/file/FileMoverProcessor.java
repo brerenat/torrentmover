@@ -110,10 +110,6 @@ public class FileMoverProcessor implements Processor {
 
 		LOG.info("New File Name :" + destination.getAbsoluteFile());
 
-		final ProcessedFile procFile = new ProcessedFile();
-		procFile.setDateProcessed(new Date());
-		procFile.setFileName(destination.getAbsolutePath());
-
 		final EntityManager em = SpringStart.getEntityManager();
 
 		em.getTransaction().begin();
@@ -125,8 +121,19 @@ public class FileMoverProcessor implements Processor {
 			LOG.warn("No Existing File Type :" + fileTypeStr);
 			fileType = new FileType();
 			fileType.setType(fileTypeStr);
+			em.persist(fileType);
 		}
 
+		ProcessedFile procFile;
+		try {
+			procFile = ProcessedFile.findWithName(em, destination.getAbsolutePath());
+		} catch (NoResultException e) {
+			LOG.warn("No Existing File with Name :" + destination.getAbsolutePath());
+			procFile = new ProcessedFile();
+			em.persist(fileType);
+			procFile.setFileName(destination.getAbsolutePath());
+		}
+		procFile.setDateProcessed(new Date());
 		procFile.setFileType(fileType);
 
 		em.persist(procFile);

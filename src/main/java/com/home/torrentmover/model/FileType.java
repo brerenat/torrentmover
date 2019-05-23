@@ -36,8 +36,8 @@ public class FileType {
 	}
 
 	public static FileType findWithName(EntityManager em, String name) throws NoResultException {
-		return em.createQuery("SELECT ft FROM FileType ft WHERE ft.type = :custName", FileType.class)
-				.setParameter("custName", name).getSingleResult();
+		return em.createQuery("SELECT ft FROM FileType ft WHERE ft.type = :typeName", FileType.class)
+				.setParameter("typeName", name).getSingleResult();
 	}
 
 }
