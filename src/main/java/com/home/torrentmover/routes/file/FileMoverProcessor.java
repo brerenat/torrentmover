@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -113,15 +114,21 @@ public class FileMoverProcessor implements Processor {
 		procFile.setDateProcessed(new Date());
 		procFile.setFileName(destination.getAbsolutePath());
 
-		final FileType fileType = new FileType();
-		fileType.setType(fileTypeStr);
-
-		procFile.setFileType(fileType);
-
 		final EntityManager em = SpringStart.getEntityManager();
 
 		em.getTransaction().begin();
-		em.persist(fileType);
+
+		FileType fileType;
+		try {
+			fileType = FileType.findWithName(em, fileTypeStr);
+		} catch (NoResultException e) {
+			LOG.warn("No Existing File Type :" + fileTypeStr);
+			fileType = new FileType();
+			fileType.setType(fileTypeStr);
+		}
+
+		procFile.setFileType(fileType);
+
 		em.persist(procFile);
 		em.getTransaction().commit();
 

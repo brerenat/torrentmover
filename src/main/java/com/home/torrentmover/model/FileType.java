@@ -1,9 +1,12 @@
 package com.home.torrentmover.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NoResultException;
 import javax.persistence.Table;
 
 @Entity
@@ -13,6 +16,7 @@ public class FileType {
 	@Id
 	@GeneratedValue(strategy = GenerationType.TABLE)
 	private int id;
+	@Column(unique = true, nullable = false)
 	private String type;
 
 	public int getId() {
@@ -29,6 +33,11 @@ public class FileType {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public static FileType findWithName(EntityManager em, String name) throws NoResultException {
+		return em.createQuery("SELECT ft FROM FileType ft WHERE ft.type = :custName", FileType.class)
+				.setParameter("custName", name).getSingleResult();
 	}
 
 }
