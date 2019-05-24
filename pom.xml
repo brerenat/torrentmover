@@ -37,7 +37,7 @@
 					<archive>
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-     						<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
 							<mainClass>com.home.torrentmover.SpringStart</mainClass>
@@ -90,6 +90,14 @@
 			<version>${camel.version}</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.apache.camel/camel-jetty -->
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-jetty</artifactId>
+			<version>${camel.version}</version>
+			<!-- use the same version as your Camel core version -->
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-undertow</artifactId>
@@ -123,6 +131,14 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>5.4.2.Final</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+
 
 	</dependencies>
 </project>

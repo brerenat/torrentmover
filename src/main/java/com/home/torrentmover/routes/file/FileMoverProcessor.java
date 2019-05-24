@@ -112,36 +112,43 @@ public class FileMoverProcessor implements Processor {
 
 		final EntityManager em = SpringStart.getEntityManager();
 
-		em.getTransaction().begin();
+		if (em != null) {
+			em.getTransaction().begin();
 
-		FileType fileType;
-		try {
-			fileType = FileType.findWithName(em, fileTypeStr);
-		} catch (NoResultException e) {
-			LOG.warn("No Existing File Type :" + fileTypeStr);
-			fileType = new FileType();
-			fileType.setType(fileTypeStr);
-			em.persist(fileType);
+			FileType fileType;
+			try {
+				fileType = FileType.findWithName(em, fileTypeStr);
+			} catch (NoResultException e) {
+				LOG.warn("No Existing File Type :" + fileTypeStr);
+				fileType = new FileType();
+				fileType.setType(fileTypeStr);
+				em.persist(fileType);
+			}
+
+			ProcessedFile procFile;
+			try {
+				procFile = ProcessedFile.findWithName(em, destination.getAbsolutePath());
+			} catch (NoResultException e) {
+				LOG.warn("No Existing File with Name :" + destination.getAbsolutePath());
+				procFile = new ProcessedFile();
+				em.persist(fileType);
+				procFile.setFileName(destination.getAbsolutePath());
+			}
+			procFile.setDateProcessed(new Date());
+			procFile.setFileType(fileType);
+
+			em.persist(procFile);
+			em.getTransaction().commit();
 		}
 
-		ProcessedFile procFile;
-		try {
-			procFile = ProcessedFile.findWithName(em, destination.getAbsolutePath());
-		} catch (NoResultException e) {
-			LOG.warn("No Existing File with Name :" + destination.getAbsolutePath());
-			procFile = new ProcessedFile();
-			em.persist(fileType);
-			procFile.setFileName(destination.getAbsolutePath());
+		String email = SpringStart.prop.getProperty("email.use");
+		if (email != null && "true".equals(email)) {
+			final String result = EmailMessageFormatter.getHTMLMessage(Arrays.asList("</br>From :<p>"
+					+ source.getAbsolutePath() + "</p></br>To :<p>" + destination.getAbsolutePath() + "</p>"));
+			exchange.getOut().setBody(result);
+			exchange.getOut().setHeader("myMail", email);
 		}
-		procFile.setDateProcessed(new Date());
-		procFile.setFileType(fileType);
 
-		em.persist(procFile);
-		em.getTransaction().commit();
-
-		final String result = EmailMessageFormatter.getHTMLMessage(Arrays.asList("</br>From :<p>"
-				+ source.getAbsolutePath() + "</p></br>To :<p>" + destination.getAbsolutePath() + "</p>"));
-		exchange.getOut().setBody(result);
 	}
 
 	private void emptyParent(final File[] files) {
