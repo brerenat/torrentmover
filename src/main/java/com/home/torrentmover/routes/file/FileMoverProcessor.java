@@ -23,7 +23,7 @@ import com.home.torrentmover.model.ProcessedFile;
 public class FileMoverProcessor implements Processor {
 
 	private static final String EPISODEREGEX = "[Ss]\\d{1,}[Ee]\\d{1,}";
-	private static final String MOVIEREGEX = "( \\d{4} )";
+	private static final String MOVIEREGEX = ".*\\d{4}([^p])";
 	private static final Logger LOG = LoggerFactory.getLogger(FileMoverProcessor.class);
 
 	private static final String MOVIE = "Movie";

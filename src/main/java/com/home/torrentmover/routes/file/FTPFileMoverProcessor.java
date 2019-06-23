@@ -20,7 +20,7 @@ import com.home.torrentmover.SpringStart;
 public class FTPFileMoverProcessor implements Processor {
 
 	private static final String EPISODEREGEX = "[Ss]\\d{1,}[Ee]\\d{1,}";
-	private static final String MOVIEREGEX = "( \\d{4} )";
+	private static final String MOVIEREGEX = ".*\\d{4}([^p])";
 	private static final Logger LOG = LoggerFactory.getLogger(FTPFileMoverProcessor.class);
 
 	private static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
@@ -93,7 +93,7 @@ public class FTPFileMoverProcessor implements Processor {
 			final Matcher matches = MOVIEPATTERN.matcher(newFileName);
 			if (matches.find()) {
 				LOG.info("Found Year String");
-				newFileName = (newFileName.split(MOVIEREGEX)[0] + matches.group()).trim();
+				newFileName = matches.group().trim();
 				LOG.info("New File Name :" + newFileName);
 			}
 			destination = movies + newFileName + ext;
@@ -107,6 +107,7 @@ public class FTPFileMoverProcessor implements Processor {
 		}
 		
 		final File parentDir = source.getParentFile();
+		source.delete();
 		LOG.info("Parent Dir :" + parentDir.getAbsoluteFile());
 		final File[] files = parentDir.listFiles(new ExtensionFilter());
 		LOG.info("Number of Files :" + files.length);
