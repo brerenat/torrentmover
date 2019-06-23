@@ -13,8 +13,13 @@ import javax.persistence.NoResultException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.file.GenericFile;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.ChannelSftp;
 
 import com.home.torrentmover.SpringStart;
 import com.home.torrentmover.model.FileType;
@@ -80,9 +85,8 @@ public class FileMoverProcessor implements Processor {
 				source.renameTo(destination);
 			} else {
 				LOG.info("Found Series Folder");
-				destination = new File(seriesFolderFound.getAbsolutePath() + "/" + seriesName + " "
-						+ nameMatcher.group().toUpperCase() + ext);
-				source.renameTo(destination);
+				destination = new File(FilenameUtils.normalize(seriesFolderFound.getAbsolutePath() + "/" + seriesName + " "
+						+ nameMatcher.group().toUpperCase() + ext));
 			}
 		} else {
 			fileTypeStr = MOVIE;
@@ -94,8 +98,24 @@ public class FileMoverProcessor implements Processor {
 				newFileName = (newFileName.split(MOVIEREGEX)[0] + matches.group()).trim();
 				LOG.info("New File Name :" + newFileName);
 			}
-			destination = new File(movies + newFileName + ext);
-			source.renameTo(destination);
+			
+			
+			destination = new File(FilenameUtils.normalize(movies + newFileName + ext));
+			
+		}
+		
+		source.renameTo(destination);
+		
+		if (!destination.exists() && SpringStart.prop.get("sftp.user") != null) {
+			JSch jsch = new JSch();
+			Session session = jsch.getSession(SpringStart.prop.get("sftp.user"), host);
+			session.setPassword(SpringStart.prop.get("sftp.user"));
+			session.connect();
+
+			ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
+			sftpChannel.connect();
+
+			sftpChannel.put("C:/source/local/path/file.zip", "/target/remote/path/file.zip");
 		}
 
 		final File parentDir = source.getParentFile();
@@ -107,7 +127,8 @@ public class FileMoverProcessor implements Processor {
 			fileArr[parentDir.listFiles().length] = parentDir;
 			emptyParent(fileArr);
 		}
-
+		
+		LOG.info("Old File Name :" + source.getAbsolutePath());
 		LOG.info("New File Name :" + destination.getAbsoluteFile());
 
 		final EntityManager em = SpringStart.getEntityManager();
