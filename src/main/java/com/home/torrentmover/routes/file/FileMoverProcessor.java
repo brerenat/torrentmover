@@ -17,10 +17,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.ChannelSftp;
-
 import com.home.torrentmover.SpringStart;
 import com.home.torrentmover.model.FileType;
 import com.home.torrentmover.model.ProcessedFile;
@@ -99,25 +95,11 @@ public class FileMoverProcessor implements Processor {
 				LOG.info("New File Name :" + newFileName);
 			}
 			
-			
 			destination = new File(FilenameUtils.normalize(movies + newFileName + ext));
-			
 		}
 		
 		source.renameTo(destination);
 		
-		if (!destination.exists() && SpringStart.prop.get("sftp.user") != null) {
-			JSch jsch = new JSch();
-			Session session = jsch.getSession(SpringStart.prop.get("sftp.user"), host);
-			session.setPassword(SpringStart.prop.get("sftp.user"));
-			session.connect();
-
-			ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
-			sftpChannel.connect();
-
-			sftpChannel.put("C:/source/local/path/file.zip", "/target/remote/path/file.zip");
-		}
-
 		final File parentDir = source.getParentFile();
 		LOG.info("Parent Dir :" + parentDir.getAbsoluteFile());
 		final File[] files = parentDir.listFiles(new ExtensionFilter());
