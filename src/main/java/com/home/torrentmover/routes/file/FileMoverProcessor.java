@@ -76,10 +76,10 @@ public class FileMoverProcessor implements Processor {
 				final File newDir = new File(series + seriesName);
 				newDir.mkdir();
 				destination = new File(
-						newDir.getAbsolutePath() + File.pathSeparatorChar + seriesName + " " + nameMatcher.group().toUpperCase() + ext);
+						newDir.getAbsolutePath() + File.separatorChar + seriesName + " " + nameMatcher.group().toUpperCase() + ext);
 			} else {
 				LOG.info("Found Series Folder");
-				destination = new File(seriesFolderFound.getAbsolutePath() + File.pathSeparatorChar + seriesName + " "
+				destination = new File(seriesFolderFound.getAbsolutePath() + File.separatorChar + seriesName + " "
 						+ nameMatcher.group().toUpperCase() + ext);
 			}
 		} else {
@@ -159,7 +159,7 @@ public class FileMoverProcessor implements Processor {
 					LOG.info("Is not empty Dir");
 					emptyParent(file.listFiles());
 				}
-				if (!file.getAbsolutePath().equals(source) && !(file.getAbsolutePath() + File.pathSeparatorChar).equals(source)) {
+				if (!file.getAbsolutePath().equals(source) && !(file.getAbsolutePath() + File.separatorChar).equals(source)) {
 					LOG.info("Deleting :" + file.getAbsoluteFile());
 					file.delete();
 				}
