@@ -98,7 +98,10 @@ public class FileUtils {
 		if (files.length == 0) {
 			File[] fileArr = new File[parentDir.listFiles().length + 1];
 			fileArr[parentDir.listFiles().length] = parentDir;
-			FileUtils.emptyParent(fileArr, sourceStr);
+			emptyParent(fileArr, sourceStr);
+			if (!parentDir.getAbsolutePath().equals(sourceStr)) {
+				parentDir.delete();
+			}
 		}
 	}
 }
