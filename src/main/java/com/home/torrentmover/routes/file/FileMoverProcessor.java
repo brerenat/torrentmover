@@ -1,10 +1,13 @@
 package com.home.torrentmover.routes.file;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.regex.Matcher;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.component.file.GenericFile;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +70,12 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 			destination = new File(movies + newFileName + ext);
 		}
 
-		source.renameTo(destination);
-
+		try (final FileOutputStream fos = new FileOutputStream(destination)) {
+			try (final FileInputStream fis = new FileInputStream(source)) {
+				IOUtils.copy(fis, fos);
+			}
+		}
+		
 		FileUtils.checkEmptyParent(source, this.source, false);
 
 		LOG.info("Old File Name :" + source.getAbsolutePath());
