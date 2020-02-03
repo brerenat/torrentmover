@@ -2,6 +2,7 @@ package com.home.torrentmover.routes.file;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 
 import org.apache.camel.Exchange;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.home.torrentmover.SpringStart;
+import com.home.utils.file.FileUtils;
 
 public class FTPFileMoverProcessor extends AbstractFileMoverProcessor {
 
@@ -84,7 +86,7 @@ public class FTPFileMoverProcessor extends AbstractFileMoverProcessor {
 			e.printStackTrace();
 		}
 
-		FileUtils.checkEmptyParent(source, this.source, true);
+		FileUtils.checkEmptyParent(source, this.source, true, Arrays.asList(SpringStart.prop.getProperty("file.formats").split("|")));
 
 		LOG.info("Old File Name :" + source.getAbsolutePath());
 		LOG.info("New File Name :" + destination);
