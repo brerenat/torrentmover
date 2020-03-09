@@ -101,7 +101,8 @@ public class FileUtils {
 			emptyParent(fileArr, sourceStr);
 			LOG.info("Parent DIR :" + parentDir.getAbsolutePath());
 			LOG.info("Source DIR :" + sourceStr);
-			if (!parentDir.getAbsolutePath().equals(sourceStr)) {
+			LOG.info("Source DIR :" + sourceStr.substring(0, sourceStr.length() - 1));
+			if (!parentDir.getAbsolutePath().equals(sourceStr) && !parentDir.getAbsolutePath().equals(sourceStr.substring(0, sourceStr.length() - 1))) {
 				parentDir.delete();
 			}
 		}
