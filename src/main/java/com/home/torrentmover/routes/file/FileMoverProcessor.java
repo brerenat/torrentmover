@@ -70,11 +70,7 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 			destination = new File(movies + newFileName + ext);
 		}
 
-		try (final FileOutputStream fos = new FileOutputStream(destination)) {
-			try (final FileInputStream fis = new FileInputStream(source)) {
-				IOUtils.copy(fis, fos);
-			}
-		}
+		source.renameTo(destination);
 		
 		FileUtils.checkEmptyParent(source, this.source, false);
 
