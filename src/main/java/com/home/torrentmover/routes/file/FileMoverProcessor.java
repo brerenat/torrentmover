@@ -3,7 +3,6 @@ package com.home.torrentmover.routes.file;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 
 import org.apache.camel.Exchange;
@@ -13,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.home.torrentmover.SpringStart;
-import com.home.utils.file.FileUtils;
 
 public class FileMoverProcessor extends AbstractFileMoverProcessor {
 
@@ -65,18 +63,20 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 			String newFileName = FileUtils.getMovieName(fileName, uppercase);
 			final Matcher matches = FileUtils.MOVIEPATTERN.matcher(newFileName);
 			if (matches.find()) {
-				final String group = matches.group();
-				LOG.info("Found Year String :" + group);
-				LOG.info("Name :" + newFileName);
+				LOG.info("Found Year String");
 				newFileName = (newFileName.split(FileUtils.MOVIEREGEX)[0] + matches.group()).trim();
 				LOG.info("New File Name :" + newFileName);
 			}
 			destination = new File(movies + newFileName + ext);
 		}
 
-		source.renameTo(destination);
+		try (final FileOutputStream fos = new FileOutputStream(destination)) {
+			try (final FileInputStream fis = new FileInputStream(source)) {
+				IOUtils.copy(fis, fos);
+			}
+		}
 		
-		FileUtils.checkEmptyParent(source, this.source, false, Arrays.asList(SpringStart.prop.getProperty("file.formats").split("|")));
+		FileUtils.checkEmptyParent(source, this.source, false);
 
 		LOG.info("Old File Name :" + source.getAbsolutePath());
 		LOG.info("New File Name :" + destination.getAbsoluteFile());
