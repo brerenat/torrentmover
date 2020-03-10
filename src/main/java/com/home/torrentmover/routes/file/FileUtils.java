@@ -72,7 +72,7 @@ public class FileUtils {
 		if (matches.find()) {
 			final String match = matches.group();
 			LOG.info("Found Year String :" + match);
-			newFileName = match.replaceFirst(MOVIEREGEX, "").trim();
+			newFileName = match.trim();
 			LOG.info("New File Name :" + newFileName);
 		}
 		return newFileName;
