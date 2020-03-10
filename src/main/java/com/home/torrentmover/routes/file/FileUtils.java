@@ -1,6 +1,8 @@
 package com.home.torrentmover.routes.file;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -62,7 +64,7 @@ public class FileUtils {
 				.trim();
 	}
 
-	public static File checkFile(final String body) throws InterruptedException {
+	public static File checkFile(final String body) throws InterruptedException, FileNotFoundException, IOException {
 		File source = new File(body);
 		final Date started = new Date();
 		final DateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
@@ -71,6 +73,9 @@ public class FileUtils {
 			LOG.info("Started checking :" + df.format(started));
 			Thread.sleep(SLEEPTIME);
 			source = new File(body);
+			if (!source.exists()) {
+				throw new FileNotFoundException("File '" + source.getCanonicalPath() + File.pathSeparator + source.getName() + " Doesn't exist anymore");
+			}
 		}
 		LOG.info("Source file unlocked, running process");
 		return source;
