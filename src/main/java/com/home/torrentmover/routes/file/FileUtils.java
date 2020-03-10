@@ -28,6 +28,10 @@ public class FileUtils {
 			if (file != null) {
 				if (file.isDirectory() && file.listFiles().length > 0) {
 					LOG.info("Is not empty Dir");
+					if (file.getName().equalsIgnoreCase("sample")) {
+						LOG.info("Folder is called Sample, deleting");
+						deleteSampleFile(file);
+					}
 					emptyParent(file.listFiles(), source);
 				}
 				if (!file.getAbsolutePath().equals(source)
@@ -35,6 +39,16 @@ public class FileUtils {
 					LOG.info("Deleting :" + file.getAbsoluteFile());
 					file.delete();
 				}
+			}
+		}
+	}
+
+	private static void deleteSampleFile(final File file) {
+		for (File sampleFile : file.listFiles()) {
+			if (sampleFile.isDirectory()) {
+				deleteSampleFile(sampleFile);
+			} else {
+				sampleFile.delete();
 			}
 		}
 	}
