@@ -22,14 +22,24 @@ public class ExtensionFilter implements FilenameFilter {
 	}
 
 	public boolean accept(final File dir, final String name) {
+		return check(name);
+	}
+	
+	public boolean check(final String name) {
 		LOG.info("File name :" + name);
-		final String lowercaseName = name.substring(name.lastIndexOf('.')).toLowerCase();
-		LOG.info("Extension :" + lowercaseName);
-		LOG.info("Extensions :" + extensions);
-		if (extensions.contains(lowercaseName)) {
-			return true;
+		final boolean result;
+		if (name.contains(".")) {
+			final String lowercaseName = name.substring(name.lastIndexOf('.')).toLowerCase();
+			LOG.info("Extension :" + lowercaseName);
+			LOG.info("Extensions :" + extensions);
+			if (extensions.contains(lowercaseName)) {
+				result = true;
+			} else {
+				result = false;
+			}
 		} else {
-			return false;
+			result = false;
 		}
+		return result;
 	}
 }

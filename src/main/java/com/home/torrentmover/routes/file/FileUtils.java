@@ -20,6 +20,7 @@ public class FileUtils {
 
 	public static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
 	public static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX);
+	private static final ExtensionFilter EXT_FILTER = new ExtensionFilter();
 
 	public static void emptyParent(final File[] files, final String source) {
 		for (final File file : files) {
@@ -30,7 +31,7 @@ public class FileUtils {
 					emptyParent(file.listFiles(), source);
 				}
 				if (!file.getAbsolutePath().equals(source)
-						&& !(file.getAbsolutePath() + File.separatorChar).equals(source)) {
+						&& !(file.getAbsolutePath() + File.separatorChar).equals(source) && !EXT_FILTER.check(file.getName())) {
 					LOG.info("Deleting :" + file.getAbsoluteFile());
 					file.delete();
 				}
@@ -94,8 +95,9 @@ public class FileUtils {
 			source.delete();
 		}
 		LOG.info("Parent Dir :" + parentDir.getAbsoluteFile());
-		final File[] files = parentDir.listFiles(new ExtensionFilter());
+		final File[] files = parentDir.listFiles(EXT_FILTER);
 		LOG.info("Number of Files :" + files.length);
+		
 		if (files.length == 0) {
 			File[] fileArr = new File[parentDir.listFiles().length + 1];
 			fileArr[parentDir.listFiles().length] = parentDir;
