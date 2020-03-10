@@ -70,8 +70,9 @@ public class FileUtils {
 		}
 		final Matcher matches = MOVIEPATTERN.matcher(newFileName);
 		if (matches.find()) {
-			LOG.info("Found Year String");
-			newFileName = matches.group().replaceFirst(MOVIEREGEX, "").trim();
+			final String match = matches.group();
+			LOG.info("Found Year String :" + match);
+			newFileName = match.replaceFirst(MOVIEREGEX, "").trim();
 			LOG.info("New File Name :" + newFileName);
 		}
 		return newFileName;
