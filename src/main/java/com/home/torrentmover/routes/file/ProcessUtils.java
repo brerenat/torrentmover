@@ -20,7 +20,7 @@ public class ProcessUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(ProcessUtils.class);
 
 	public static void updateDatebase(final String destination, final String fileTypeStr) {
-		final EntityManager em = SpringStart.getEntityManager();
+		final EntityManager em = SpringStart.getEm();
 
 		if (em != null) {
 			em.getTransaction().begin();
@@ -53,7 +53,7 @@ public class ProcessUtils {
 	}
 
 	public static void checkSendEmail(final Exchange exchange, final File source, final String destination) {
-		final String email = SpringStart.prop.getProperty("email.use");
+		final String email = SpringStart.getProp().getProperty("email.use");
 		if (email != null && "true".equals(email)) {
 			final String result = EmailMessageFormatter.getHTMLMessage(Arrays
 					.asList("</br>From :<p>" + source.getAbsolutePath() + "</p></br>To :<p>" + destination + "</p>"));

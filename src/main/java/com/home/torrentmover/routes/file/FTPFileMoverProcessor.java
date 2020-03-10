@@ -19,8 +19,8 @@ public class FTPFileMoverProcessor extends AbstractFileMoverProcessor {
 	private static final Logger LOG = LoggerFactory.getLogger(FileMoverProcessor.class);
 
 	public FTPFileMoverProcessor() {
-		super(SpringStart.prop.getProperty("movies"), SpringStart.prop.getProperty("series"),
-				SpringStart.prop.getProperty("source"));
+		super(SpringStart.getProp().getProperty("movies"), SpringStart.getProp().getProperty("series"),
+				SpringStart.getProp().getProperty("source"));
 	}
 
 	public void process(final Exchange exchange) throws Exception {
@@ -42,10 +42,10 @@ public class FTPFileMoverProcessor extends AbstractFileMoverProcessor {
 
 		ftp.configure(config);
 
-		ftp.connect(SpringStart.prop.getProperty("ftp.host"));
-		ftp.login(SpringStart.prop.getProperty("ftp.user"), SpringStart.prop.getProperty("ftp.password"));
+		ftp.connect(SpringStart.getProp().getProperty("ftp.host"));
+		ftp.login(SpringStart.getProp().getProperty("ftp.user"), SpringStart.getProp().getProperty("ftp.password"));
 
-		final boolean uppercase = Boolean.getBoolean(SpringStart.prop.getProperty("file.uppercase.firstchar"));
+		final boolean uppercase = Boolean.getBoolean(SpringStart.getProp().getProperty("file.uppercase.firstchar"));
 
 		if (nameMatcher.find()) {
 			fileTypeStr = SERIES;

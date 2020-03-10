@@ -17,14 +17,25 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SpringStart {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SpringStart.class);
-	public static Properties prop;
-
+	private static Properties prop;
 	private static EntityManager em;
 
-	public static EntityManager getEntityManager() {
+	public static Properties getProp() {
+		return prop;
+	}
+
+	public static void setProp(Properties prop) {
+		SpringStart.prop = prop;
+	}
+
+	public static EntityManager getEm() {
 		return em;
 	}
 
+	public static void setEm(EntityManager em) {
+		SpringStart.em = em;
+	}
+	
 	public static void main(String[] args) {
 
 		try (final InputStream input = new FileInputStream("application.properties")) {

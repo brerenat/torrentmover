@@ -15,7 +15,7 @@ public class FileMover extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		LOG.info("Starting Configure");
-		if (SpringStart.prop.getProperty("ftp.user") == null || SpringStart.prop.getProperty("ftp.user").isEmpty()) {
+		if (SpringStart.getProp().getProperty("ftp.user") == null || SpringStart.getProp().getProperty("ftp.user").isEmpty()) {
 			from("file:{{source}}?recursive=true&noop=true&include={{file.formats}}").process(new FileMoverProcessor())
 					.choice().when(header("myMail").isEqualTo("true"))
 					.to("smtps://{{email.smtp}}:{{email.port}}?username={{email.sender}}&password={{email.password}}&from={{email.sender}}&to={{email.to}}&subject={{email.subject}}&contentType=text/html")

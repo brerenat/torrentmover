@@ -1,13 +1,10 @@
 package com.home.torrentmover.routes.file;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.regex.Matcher;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.component.file.GenericFile;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +15,8 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 	private static final Logger LOG = LoggerFactory.getLogger(FileMoverProcessor.class);
 
 	public FileMoverProcessor() {
-		super(SpringStart.prop.getProperty("movies"), SpringStart.prop.getProperty("series"),
-				SpringStart.prop.getProperty("source"));
+		super(SpringStart.getProp().getProperty("movies"), SpringStart.getProp().getProperty("series"),
+				SpringStart.getProp().getProperty("source"));
 	}
 
 	public void process(final Exchange exchange) throws Exception {
@@ -34,7 +31,7 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 		final String fileName = body.getFileNameOnly().substring(0, body.getFileNameOnly().lastIndexOf('.'));
 		final File destination;
 		final String fileTypeStr;
-		final boolean uppercase = Boolean.getBoolean(SpringStart.prop.getProperty("file.uppercase.firstchar"));
+		final boolean uppercase = Boolean.getBoolean(SpringStart.getProp().getProperty("file.uppercase.firstchar"));
 		if (nameMatcher.find()) {
 			fileTypeStr = SERIES;
 			String seriesName = FileUtils.getSeriesName(fileName, uppercase);

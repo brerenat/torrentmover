@@ -2,21 +2,34 @@ package com.home.torrentmover.routes.file;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.home.torrentmover.SpringStart;
 
 public class ExtensionFilter implements FilenameFilter {
+	private static final Logger LOG = LoggerFactory.getLogger(ExtensionFilter.class);
+	private final List<String> extensions;
+	
+	public ExtensionFilter() {
+		extensions = new ArrayList<>();
+		for (final String ext : SpringStart.getProp().getProperty("file.formats").split("\\|")) {
+			extensions.add(ext.substring(ext.lastIndexOf('.')));
+		}
+	}
 
-	public boolean accept(File dir, String name) {
-		final String lowercaseName = name.substring(name.length() - name.lastIndexOf('.')).toLowerCase();
-		final List<String> extensions = Arrays.asList(SpringStart.prop.getProperty("file.formats").split("|"));
+	public boolean accept(final File dir, final String name) {
+		LOG.info("File name :" + name);
+		final String lowercaseName = name.substring(name.lastIndexOf('.')).toLowerCase();
+		LOG.info("Extension :" + lowercaseName);
+		LOG.info("Extensions :" + extensions);
 		if (extensions.contains(lowercaseName)) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-
 }
