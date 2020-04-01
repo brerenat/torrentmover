@@ -8,6 +8,7 @@
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 		<class>com.home.torrentmover.model.FileType</class>
 		<class>com.home.torrentmover.model.ProcessedFile</class>
+		<class>com.home.torrentmover.model.SubscriptionDTO</class>
 		<properties>
 	        <property name="hibernate.hbm2ddl.auto" value="update"/>
 		</properties>

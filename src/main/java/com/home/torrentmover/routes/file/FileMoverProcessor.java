@@ -76,6 +76,7 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 
 		ProcessUtils.updateDatebase(destination.getAbsolutePath(), fileTypeStr);
 		ProcessUtils.checkSendEmail(exchange, source, destination.getAbsolutePath());
+		ProcessUtils.sendNotifications("Finished File '" + destination.getName() + "' Sorted as a '" + fileTypeStr + "'");
 	}
 
 }

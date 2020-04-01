@@ -74,7 +74,7 @@ public class FileUtils {
 			Thread.sleep(SLEEPTIME);
 			source = new File(body);
 			if (!source.exists()) {
-				throw new FileNotFoundException("File '" + source.getCanonicalPath() + File.pathSeparator + source.getName() + " Doesn't exist anymore");
+				throw new FileNotFoundException("File '" + source.getCanonicalPath() + File.pathSeparator + source.getName() + "' Doesn't exist anymore");
 			}
 		}
 		LOG.info("Source file unlocked, running process");

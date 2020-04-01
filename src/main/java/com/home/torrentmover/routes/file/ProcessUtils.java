@@ -1,19 +1,29 @@
 package com.home.torrentmover.routes.file;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
 import org.apache.camel.Exchange;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.jose4j.lang.JoseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.home.torrentmover.SpringStart;
 import com.home.torrentmover.model.FileType;
 import com.home.torrentmover.model.ProcessedFile;
+import com.home.torrentmover.model.SubscriptionDTO;
+
+import nl.martijndwars.webpush.Notification;
+import nl.martijndwars.webpush.PushService;
 
 public class ProcessUtils {
 
@@ -51,7 +61,7 @@ public class ProcessUtils {
 			em.getTransaction().commit();
 		}
 	}
-
+	
 	public static void checkSendEmail(final Exchange exchange, final File source, final String destination) {
 		final String email = SpringStart.getProp().getProperty("email.use");
 		if (email != null && "true".equals(email)) {
@@ -60,5 +70,21 @@ public class ProcessUtils {
 			exchange.getOut().setBody(result);
 			exchange.getOut().setHeader("myMail", email);
 		}
+	}
+	
+	public static void sendNotifications(final String message) throws GeneralSecurityException, IOException, JoseException, ExecutionException, InterruptedException {
+		final EntityManager em = SpringStart.getEm();
+		if (em != null) {
+			for (final SubscriptionDTO subscriptionDTO : SubscriptionDTO.getSubscriptions(em)) {
+				sendNotification(subscriptionDTO, message);
+			}
+		}
+	}
+	
+	private static void sendNotification(final SubscriptionDTO sub, final String message) throws GeneralSecurityException, IOException, JoseException, ExecutionException, InterruptedException {
+		Security.addProvider(new BouncyCastleProvider());
+		PushService pushService = new PushService("BOhYqWK66Jh6c52yc44L_x_EufBp0xrPf3D-W_VzbaaNewGMg_sk2ELBc5bIaRW8JGxfGh83FBQ4qp8jIR6BGIo", "jBY7yY7RiYanHP8kTw2NL7KNjZIDGlEi7Piry4Ez24A", "NAS");
+		Notification notification = new Notification(sub.getEndpoint(), sub.getP256dh(), sub.getAuth(), message);
+		pushService.send(notification);
 	}
 }
