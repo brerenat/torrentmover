@@ -101,8 +101,6 @@ function unsubscribeUser() {
 }
 
 function updateSubscriptionOnServer(subscription) {
-  // TODO: Send subscription to application server
-
   const subscriptionJson = $('.js-subscription-json');
   const subscriptionDetails = $('.js-subscription-details');
 
@@ -151,4 +149,33 @@ function urlB64ToUint8Array(base64String) {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
+}
+
+$(document).ready(function(){
+	getProcessed();
+});
+
+function getProcessed() {
+	$.ajax({
+		url : "/rest/getFiles",
+		data : {},
+		success : function(res) {
+			var grid = $('.files-container');
+			$(grid).append("<div class='item'>Date Processed</div>");
+			$(grid).append("<div class='item'>File Name</div>");
+			var date;
+			var name;
+			$(res).each(function() {
+				date = $("<div class='item'></div>");
+				$(date).text(moment(this.dateProcessed).format("DD-MM-YYYY HH:mm:ss"));
+				name = $("<div class='item'></div>");
+				$(name).text(this.fileName);
+				$(grid).append(date);
+				$(grid).append(name);
+			});
+		},
+		error: function(e1, e2, e3) {
+			alert(e1 + "\r\n" + e2 + "\r\n" + e3);
+		}
+	})
 }

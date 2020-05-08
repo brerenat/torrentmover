@@ -1,6 +1,7 @@
 package com.home.torrentmover.model;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -64,9 +65,14 @@ public class ProcessedFile {
 		this.fileType = fileType;
 	}
 
-	public static ProcessedFile findWithName(EntityManager em, String name) throws NoResultException {
+	public static ProcessedFile findWithName(final EntityManager em, final String name) throws NoResultException {
 		return em.createQuery("SELECT pf FROM ProcessedFile pf WHERE pf.fileName = :fileName", ProcessedFile.class)
 				.setParameter("fileName", name).getSingleResult();
+	}
+	
+	public static List<ProcessedFile> getAll(final EntityManager em) throws NoResultException {
+		return em.createQuery("SELECT pf FROM ProcessedFile pf", ProcessedFile.class)
+				.getResultList();
 	}
 
 }

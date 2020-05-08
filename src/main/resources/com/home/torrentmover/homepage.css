@@ -1,4 +1,14 @@
+body {
+	font-family: Arial;
+}
+
 p {
 	color: blue;
 	font-weight: bold;
+}
+
+.files-container {
+	display: grid;
+	grid-template-rows: auto;
+	grid-template-columns: 10% auto;
 }

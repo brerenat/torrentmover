@@ -1,5 +1,6 @@
 package com.home.torrentmover;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.persistence.EntityManager;
@@ -13,6 +14,8 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.home.torrentmover.model.ProcessedFile;
 import com.home.torrentmover.model.SubscriptionDTO;
 
 public class HomepageHandler extends AbstractHandler {
@@ -48,6 +51,14 @@ public class HomepageHandler extends AbstractHandler {
 			fileToSend = "success.json";
 			response.setContentType("text/json");
 			break;
+		case "/rest/getFiles":
+			response.setContentType("text/json");
+			final ObjectMapper mapper = new ObjectMapper();
+			LOG.info("EM :" + SpringStart.getEm());
+			final ByteArrayInputStream bis = new ByteArrayInputStream(mapper.writeValueAsBytes(ProcessedFile.getAll(SpringStart.getEm())));
+			IOUtils.copy(bis, response.getOutputStream());
+			fileToSend = null;
+			break;
 		default:
 			fileToSend = "homepage.html";
 			response.setContentType("text/html; charset=utf-8");
@@ -56,7 +67,9 @@ public class HomepageHandler extends AbstractHandler {
 
 		LOG.info("Response File :" + fileToSend);
 		
-		IOUtils.copy(this.getClass().getResourceAsStream(fileToSend), response.getOutputStream());
+		if (fileToSend != null) { 
+			IOUtils.copy(this.getClass().getResourceAsStream(fileToSend), response.getOutputStream());
+		}
 
 		baseRequest.setHandled(true);
 	}
