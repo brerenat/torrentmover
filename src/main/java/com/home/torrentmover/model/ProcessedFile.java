@@ -71,7 +71,7 @@ public class ProcessedFile {
 	}
 	
 	public static List<ProcessedFile> getAll(final EntityManager em) throws NoResultException {
-		return em.createQuery("SELECT pf FROM ProcessedFile pf", ProcessedFile.class)
+		return em.createQuery("SELECT pf FROM ProcessedFile pf ORDER BY pf.dateProcessed DESC", ProcessedFile.class)
 				.getResultList();
 	}
 
