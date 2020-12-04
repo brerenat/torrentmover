@@ -1,156 +1,3 @@
-// delegate event for performance, and save attaching a million events to each anchor
-document.addEventListener('click', function(event) {
-  var target = event.target;
-  if (target.tagName.toLowerCase() == 'a') {
-      var port = target.getAttribute('href').match(/^:(\d+)(.*)/);
-      if (port) {
-         target.href = window.location.origin;
-         target.port = port[1];
-      }
-  }
-}, false);
-
-if ('serviceWorker' in navigator && 'PushManager' in window) {
-  console.log('Service Worker and Push is supported');
-
-  navigator.serviceWorker.register('sw.js')
-  .then(function(swReg) {
-    console.log('Service Worker is registered', swReg);
-
-    swRegistration = swReg;
-    initializeUI();
-  })
-  .catch(function(error) {
-    console.error('Service Worker Error', error);
-  });
-} else {
-  console.warn('Push messaging is not supported');
-  pushButton.textContent = 'Push Not Supported';
-}
-
-const publicKey = "BOhYqWK66Jh6c52yc44L_x_EufBp0xrPf3D-W_VzbaaNewGMg_sk2ELBc5bIaRW8JGxfGh83FBQ4qp8jIR6BGIo";
-
-function initializeUI() {
-	$('.notification-button').click(function() {
-		this.disabled = true;
-	    if (isSubscribed) {
-	      unsubscribeUser();
-	    } else {
-	      subscribeUser();
-	    }
-	});
-	
-  // Set the initial subscription value
-  swRegistration.pushManager.getSubscription()
-  .then(function(subscription) {
-    isSubscribed = !(subscription === null);
-
-    if (isSubscribed) {
-      console.log('User IS subscribed.');
-    } else {
-      console.log('User is NOT subscribed.');
-    }
-
-    updateBtn();
-  });
-}
-
-function updateBtn() {
-	$('.notification-button').attr("disabled", false);
-}
-
-function subscribeUser() {
-  const applicationServerKey = urlB64ToUint8Array(publicKey);
-  swRegistration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: applicationServerKey
-  })
-  .then(function(subscription) {
-    console.log('User is subscribed.');
-
-    updateSubscriptionOnServer(subscription);
-
-    isSubscribed = true;
-
-    updateBtn();
-  })
-  .catch(function(err) {
-    console.log('Failed to subscribe the user: ', err);
-    updateBtn();
-  });
-}
-
-function unsubscribeUser() {
-  swRegistration.pushManager.getSubscription()
-  .then(function(subscription) {
-    if (subscription) {
-      return subscription.unsubscribe();
-    }
-  })
-  .catch(function(error) {
-    console.log('Error unsubscribing', error);
-  })
-  .then(function() {
-    updateSubscriptionOnServer(null);
-
-    console.log('User is unsubscribed.');
-    isSubscribed = false;
-
-    updateBtn();
-  });
-}
-
-function updateSubscriptionOnServer(subscription) {
-  const subscriptionJson = $('.js-subscription-json');
-  const subscriptionDetails = $('.js-subscription-details');
-
-  console.log(subscription);
-  
-  if (subscription) {
-    subscriptionJson.html(JSON.stringify(subscription));
-    subscriptionDetails.show();
-    sendToServer(JSON.stringify(subscription));
-  } else {
-    subscriptionDetails.hide();
-  }
-}
-
-function sendToServer(subIn) {
-	var sub = JSON.parse(subIn);
-	console.log("Sending to Server");
-	console.log(sub);
-	var toSend = {
-		"endpoint" : sub.endpoint,
-		"auth" : sub.keys.auth,
-		"p256dh" : sub.keys.p256dh
-	}
-	$.ajax({
-		url : "/rest/saveSub",
-		data : toSend,
-		success : function(res) {
-			alert(res.result);
-		},
-		error: function(e1, e2, e3) {
-			alert(e1 + "\r\n" + e2 + "\r\n" + e3);
-		}
-	})
-}
-
-function urlB64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/\-/g, '+')
-    .replace(/_/g, '/');
-
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
 $(document).ready(function(){
 	getProcessed();
 });
@@ -179,3 +26,114 @@ function getProcessed() {
 		}
 	})
 }
+
+const omdb = 'https://www.omdbapi.com/';
+const omdbKey = 'd6985468';
+const omdbData = {
+	"apikey": omdbKey,
+	"s" : ""
+};
+
+function searchOMDB(search, callback) {
+	omdbData.s = search;
+	
+	$.get(omdb, omdbData, function(data) {
+		var list = [];
+		var title;
+		var img;
+		var cont;
+		console.log(data);
+		$(data.Search).each(function(){
+			title = $('<div class="imdb-title"></div>');
+			$(title).text(this.Title + " " + this.Year);
+			img = $('<img src="' + this.Poster + '" class="imdb-img"/>');
+			cont = $('<div class="imdb-container"></div>');
+			$(cont).append(img);
+			$(cont).append(title);
+			list.push({"label" : cont, "value" : this.imdbID});
+		});
+		console.log(list);
+		if (callback) {
+			callback(list);
+		}
+	});
+}
+
+var searchTimeout;
+$(document).on("keyup", "#omdb-search", function (){
+	var item = this;
+	var data = $(item).val();
+	
+	if (searchTimeout) {
+		clearTimeout(searchTimeout);
+		searchTimeout = null;
+	}
+	
+	searchTimeout = setTimeout(function() {
+		try {
+			$(item).autocomplete("destroy");
+		}
+		catch {
+			console.error("Called Destroy before Initializing autocomplete");
+		}
+		if (data.length > 2) {
+			searchOMDB(data, function(list){
+				console.log("Callback");
+				$(item).autocomplete({
+					source: list,
+					appendTo: document.body,
+					html: true
+				});
+				$(item).autocomplete("search", data);
+			})
+		}
+		
+	}, 1500);
+});
+
+
+/*
+ * jQuery UI Autocomplete HTML Extension
+ *
+ * Copyright 2010, Scott González (http://scottgonzalez.com)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ *
+ * http://github.com/scottgonzalez/jquery-ui-extensions
+ */
+(function( $ ) {
+
+var proto = $.ui.autocomplete.prototype,
+	initSource = proto._initSource;
+
+function filter( array, term ) {
+	var matcher = new RegExp( $.ui.autocomplete.escapeRegex(term), "i" );
+	return $.grep( array, function(value) {
+		return matcher.test( $( "<div>" ).html( value.label || value.value || value ).text() );
+	});
+}
+
+$.extend( proto, {
+	_initSource: function() {
+		console.log("HTML :" + this.options.html);
+		if ( this.options.html && $.isArray(this.options.source) ) {
+			this.source = function( request, response ) {
+				response( filter( this.options.source, request.term ) );
+			};
+		} else {
+			initSource.call( this );
+		}
+	},
+
+	_renderItem: function( ul, item) {
+		console.log(item);
+		console.log("HTML :" + this.options.html);
+		return $( "<li></li>" )
+			.data( "item.autocomplete", item )
+			.append( $( "<a></a>" )[ this.options.html ? "html" : "text" ]( item.label ) )
+			.appendTo( ul );
+	}
+});
+
+})( jQuery );
+
+

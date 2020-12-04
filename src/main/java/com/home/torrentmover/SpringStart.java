@@ -52,7 +52,8 @@ public class SpringStart {
 
 			Object dbUse = prop.get("database.use");
 
-			if (dbUse == null || "true".contentEquals(dbUse.toString())) {
+			LOG.info("DB Use :"+ dbUse);
+			if (dbUse != null && "true".contentEquals(dbUse.toString())) {
 				EntityManagerFactory factory = Persistence.createEntityManagerFactory("torrentmover", prop);
 				em = factory.createEntityManager();
 			}
@@ -71,6 +72,8 @@ public class SpringStart {
 			HttpConfiguration https = new HttpConfiguration();
 			https.addCustomizer(new SecureRequestCustomizer());
 			
+			
+			// Jetty Basic Server
 			Client client = new Client();
 			client.setKeyStorePath(SpringStart.class.getResource("/keystore").toExternalForm());
 			client.setKeyStorePassword("changeit");
