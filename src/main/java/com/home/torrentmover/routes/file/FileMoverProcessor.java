@@ -83,7 +83,8 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 			final List<File> subtitles = FileUtils.getFileForMatch(parent, FileUtils.SUBPATTERN);
 			File subFile;
 			for (final File subtitle : subtitles) {
-				if (subtitles.size() == 1 || subtitle.getName().contains("english")) {
+				if (subtitles.size() == 1 || subtitle.getName().contains("english") || subtitle.getName().contains("eng")) {
+					LOG.info("Subtitle file found");
 					subFile = new File(new StringBuilder(movieNameNoExt).append(".en").append(subtitle.getName().substring(subtitle.getName().lastIndexOf('.'))).toString());
 					subtitle.renameTo(subFile);
 				}
