@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,11 +21,20 @@ public class FileUtils {
 
 	public static final String EPISODEREGEX = "[Ss]\\d{1,}[Ee]\\d{1,}";
 	public static final String MOVIEREGEX = ".*\\d{4}([^p])";
+	public static final String SUBREGEX = ".*\\.srt|.*\\.smi|.*\\.ssa|.*\\.ass|.*\\.vtt";
+	public static final String YEARREGEX = "\\d{4}";
 
 	public static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
 	public static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX);
+	public static final Pattern SUBPATTERN = Pattern.compile(SUBREGEX);
+	public static final Pattern YEARPATTERN = Pattern.compile(YEARREGEX);
 	private static final ExtensionFilter EXT_FILTER = new ExtensionFilter();
 
+	/**
+	 * 
+	 * @param files
+	 * @param source
+	 */
 	public static void emptyParent(final File[] files, final String source) {
 		for (final File file : files) {
 			LOG.info("File To Check :" + file);
@@ -45,6 +56,10 @@ public class FileUtils {
 		}
 	}
 
+	/**
+	 * 
+	 * @param file
+	 */
 	private static void deleteSampleFile(final File file) {
 		for (File sampleFile : file.listFiles()) {
 			if (sampleFile.isDirectory()) {
@@ -55,15 +70,33 @@ public class FileUtils {
 		}
 	}
 
+	/**
+	 * 
+	 * @param in
+	 * @return
+	 */
 	public static String setFirstCharUppercase(final String in) {
 		return in.substring(0, 1).toUpperCase() + in.substring(1, in.length());
 	}
 
+	/**
+	 * 
+	 * @param in
+	 * @return
+	 */
 	public static String removeSpecialChars(final String in) {
 		return in.replace('.', ' ').replace('_', ' ').replaceAll("\\[(.*?)\\]", "").replaceAll("\\((.*?)\\)", "")
 				.trim();
 	}
 
+	/**
+	 * 
+	 * @param body
+	 * @return
+	 * @throws InterruptedException
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	public static File checkFile(final String body) throws InterruptedException, FileNotFoundException, IOException {
 		File source = new File(body);
 		final Date started = new Date();
@@ -81,6 +114,12 @@ public class FileUtils {
 		return source;
 	}
 
+	/**
+	 * 
+	 * @param fileName
+	 * @param uppercase
+	 * @return
+	 */
 	public static String getMovieName(final String fileName, final boolean uppercase) {
 		String newFileName;
 		if (uppercase) {
@@ -98,6 +137,12 @@ public class FileUtils {
 		return newFileName;
 	}
 
+	/**
+	 * 
+	 * @param fileName
+	 * @param uppercase
+	 * @return
+	 */
 	public static String getSeriesName(final String fileName, final boolean uppercase) {
 		String seriesName;
 		if (uppercase) {
@@ -108,6 +153,12 @@ public class FileUtils {
 		return seriesName;
 	}
 
+	/**
+	 * 
+	 * @param source
+	 * @param sourceStr
+	 * @param ftp
+	 */
 	public static void checkEmptyParent(final File source, final String sourceStr, final boolean ftp) {
 		final File parentDir = source.getParentFile();
 		if (ftp) {
@@ -128,5 +179,42 @@ public class FileUtils {
 				parentDir.delete();
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @param seriesName
+	 * @param seriesDir
+	 * @return
+	 */
+	public static File getExistingFolder(String seriesName, final File seriesDir) {
+		File seriesFolderFound = null;
+		for (final File dir : seriesDir.listFiles()) {
+			if (dir.isDirectory()
+					&& (dir.getName().equalsIgnoreCase(seriesName) || dir.getName().contains(seriesName))) {
+				seriesFolderFound = dir;
+			}
+		}
+		return seriesFolderFound;
+	}
+	
+	/**
+	 * 
+	 * @param dir
+	 * @param regex
+	 * @return
+	 */
+	public static List<File> getFileForMatch(final File dir, final Pattern regex) {
+		List<File> files = new ArrayList<>();
+		Matcher match;
+		for (final File file : dir.listFiles()) {
+			match = regex.matcher(file.getName());
+			if (file.isDirectory()) {
+				files.addAll(getFileForMatch(file, regex));
+			} else if (match.find()) {
+				files.add(file);
+			}
+		}
+		return files;
 	}
 }

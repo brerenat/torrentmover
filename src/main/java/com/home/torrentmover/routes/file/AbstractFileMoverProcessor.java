@@ -6,6 +6,7 @@ public abstract class AbstractFileMoverProcessor implements Processor {
 
 	protected static final String MOVIE = "Movie";
 	protected static final String SERIES = "Series";
+	protected static final String SUBTITLE = "Subtitle";
 
 	protected final String movies;
 	protected final String series;

@@ -42,17 +42,22 @@ function searchOMDB(search, callback) {
 		var title;
 		var img;
 		var cont;
-		console.log(data);
-		$(data.Search).each(function(){
-			title = $('<div class="imdb-title"></div>');
-			$(title).text(this.Title + " " + this.Year);
-			img = $('<img src="' + this.Poster + '" class="imdb-img"/>');
-			cont = $('<div class="imdb-container"></div>');
-			$(cont).append(img);
-			$(cont).append(title);
-			list.push({"label" : cont, "value" : this.imdbID});
+		
+		data.Search.sort(function(first, second) {
+			return second.Year.localeCompare(first.Year);
 		});
-		console.log(list);
+		
+		$(data.Search).each(function(){
+			if (this.Poster != 'N/A') {
+				title = $('<div class="imdb-title"></div>');
+				$(title).text(this.Title + " " + this.Year);
+				img = $('<img src="' + this.Poster + '" class="imdb-img"/>');
+				cont = $('<div class="imdb-container"></div>');
+				$(cont).append(img);
+				$(cont).append(title);
+				list.push({"label" : cont, "value" : this.imdbID});
+			}
+		});
 		if (callback) {
 			callback(list);
 		}
@@ -74,11 +79,10 @@ $(document).on("keyup", "#omdb-search", function (){
 			$(item).autocomplete("destroy");
 		}
 		catch {
-			console.error("Called Destroy before Initializing autocomplete");
+			console.debug("Called Destroy before Initializing autocomplete");
 		}
 		if (data.length > 2) {
 			searchOMDB(data, function(list){
-				console.log("Callback");
 				$(item).autocomplete({
 					source: list,
 					appendTo: document.body,
@@ -88,7 +92,7 @@ $(document).on("keyup", "#omdb-search", function (){
 			})
 		}
 		
-	}, 1500);
+	}, 700);
 });
 
 
@@ -125,8 +129,6 @@ $.extend( proto, {
 	},
 
 	_renderItem: function( ul, item) {
-		console.log(item);
-		console.log("HTML :" + this.options.html);
 		return $( "<li></li>" )
 			.data( "item.autocomplete", item )
 			.append( $( "<a></a>" )[ this.options.html ? "html" : "text" ]( item.label ) )

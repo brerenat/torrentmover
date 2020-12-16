@@ -1,6 +1,7 @@
 package com.home.torrentmover.routes.file;
 
 import java.io.File;
+import java.util.List;
 import java.util.regex.Matcher;
 
 import org.apache.camel.Exchange;
@@ -37,34 +38,57 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 			String seriesName = FileUtils.getSeriesName(fileName, uppercase);
 			final File seriesDir = new File(series);
 			LOG.info("Series Name :" + seriesName);
-			File seriesFolderFound = null;
-			for (final File dir : seriesDir.listFiles()) {
-				if (dir.isDirectory()
-						&& (dir.getName().equalsIgnoreCase(seriesName) || dir.getName().contains(seriesName))) {
-					seriesFolderFound = dir;
-					seriesName = dir.getName();
-				}
-			}
+			File seriesFolderFound = FileUtils.getExistingFolder(seriesName, seriesDir);
 			if (seriesFolderFound == null) {
 				final File newDir = new File(series + seriesName);
 				newDir.mkdir();
-				destination = new File(newDir.getAbsolutePath() + File.separatorChar + seriesName + " "
-						+ nameMatcher.group().toUpperCase() + ext);
+				destination = new File(new StringBuilder(newDir.getAbsolutePath()).append(File.separatorChar).append(seriesName)
+						.append(" ").append(nameMatcher.group().toUpperCase()).append(ext).toString());
 			} else {
 				LOG.info("Found Series Folder");
-				destination = new File(seriesFolderFound.getAbsolutePath() + File.separatorChar + seriesName + " "
-						+ nameMatcher.group().toUpperCase() + ext);
+				destination = new File(new StringBuilder(seriesFolderFound.getAbsolutePath()).append(File.separatorChar).append(seriesFolderFound.getName())
+						.append(" ").append(nameMatcher.group().toUpperCase()).append(ext).toString());
 			}
 		} else {
 			fileTypeStr = MOVIE;
+			LOG.info("File Name :" + fileName);
 			String newFileName = FileUtils.getMovieName(fileName, uppercase);
-			final Matcher matches = FileUtils.MOVIEPATTERN.matcher(newFileName);
+			LOG.info("New File Name :" + newFileName);
+			final Matcher matches = FileUtils.YEARPATTERN.matcher(newFileName);
 			if (matches.find()) {
 				LOG.info("Found Year String");
-				newFileName = (newFileName.split(FileUtils.MOVIEREGEX)[0] + matches.group()).trim();
+				newFileName = new StringBuilder(newFileName.split(FileUtils.YEARREGEX)[0]).append("(").append(matches.group()).append(")").toString().trim();
 				LOG.info("New File Name :" + newFileName);
 			}
-			destination = new File(movies + newFileName + ext);
+			
+			final File moviesDir = new File(movies);
+			File moviesFolderFound = FileUtils.getExistingFolder(newFileName, moviesDir);
+			
+			final String movieNameNoExt;
+			
+			if (moviesFolderFound == null) {
+				final File newDir = new File(movies + newFileName);
+				newDir.mkdir();
+				movieNameNoExt = new StringBuilder(newDir.getAbsolutePath()).append(File.separatorChar).append(newFileName).toString();
+				destination = new File(new StringBuilder(movieNameNoExt).append(ext).toString());
+			} else {
+				LOG.info("Found Movies Folder");
+				movieNameNoExt = new StringBuilder(moviesFolderFound.getAbsolutePath()).append(File.separatorChar).append(newFileName).toString();
+				destination = new File(new StringBuilder(movieNameNoExt).append(ext).toString());
+			}
+			
+			LOG.info("Parent :" + source.getParent());
+			
+			final File parent = source.getParentFile();
+			final List<File> subtitles = FileUtils.getFileForMatch(parent, FileUtils.SUBPATTERN);
+			File subFile;
+			for (final File subtitle : subtitles) {
+				if (subtitles.size() == 1 || subtitle.getName().contains("english")) {
+					subFile = new File(new StringBuilder(movieNameNoExt).append(".en").append(subtitle.getName().substring(subtitle.getName().lastIndexOf('.'))).toString());
+					subtitle.renameTo(subFile);
+				}
+			}
+			
 		}
 
 		source.renameTo(destination);
