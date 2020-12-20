@@ -35,60 +35,10 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 		final boolean uppercase = Boolean.getBoolean(SpringStart.getProp().getProperty("file.uppercase.firstchar"));
 		if (nameMatcher.find()) {
 			fileTypeStr = SERIES;
-			String seriesName = FileUtils.getSeriesName(fileName, uppercase);
-			final File seriesDir = new File(series);
-			LOG.info("Series Name :" + seriesName);
-			File seriesFolderFound = FileUtils.getExistingFolder(seriesName, seriesDir);
-			if (seriesFolderFound == null) {
-				final File newDir = new File(series + seriesName);
-				newDir.mkdir();
-				destination = new File(new StringBuilder(newDir.getAbsolutePath()).append(File.separatorChar).append(seriesName)
-						.append(" ").append(nameMatcher.group().toUpperCase()).append(ext).toString());
-			} else {
-				LOG.info("Found Series Folder");
-				destination = new File(new StringBuilder(seriesFolderFound.getAbsolutePath()).append(File.separatorChar).append(seriesFolderFound.getName())
-						.append(" ").append(nameMatcher.group().toUpperCase()).append(ext).toString());
-			}
+			destination = processSeries(nameMatcher, ext, fileName, uppercase);
 		} else {
 			fileTypeStr = MOVIE;
-			LOG.info("File Name :" + fileName);
-			String newFileName = FileUtils.getMovieName(fileName, uppercase);
-			LOG.info("New File Name :" + newFileName);
-			final Matcher matches = FileUtils.YEARPATTERN.matcher(newFileName);
-			if (matches.find()) {
-				LOG.info("Found Year String");
-				newFileName = new StringBuilder(newFileName.split(FileUtils.YEARREGEX)[0]).append("(").append(matches.group()).append(")").toString().trim();
-				LOG.info("New File Name :" + newFileName);
-			}
-			
-			final File moviesDir = new File(movies);
-			File moviesFolderFound = FileUtils.getExistingFolder(newFileName, moviesDir);
-			
-			final String movieNameNoExt;
-			
-			if (moviesFolderFound == null) {
-				final File newDir = new File(movies + newFileName);
-				newDir.mkdir();
-				movieNameNoExt = new StringBuilder(newDir.getAbsolutePath()).append(File.separatorChar).append(newFileName).toString();
-				destination = new File(new StringBuilder(movieNameNoExt).append(ext).toString());
-			} else {
-				LOG.info("Found Movies Folder");
-				movieNameNoExt = new StringBuilder(moviesFolderFound.getAbsolutePath()).append(File.separatorChar).append(newFileName).toString();
-				destination = new File(new StringBuilder(movieNameNoExt).append(ext).toString());
-			}
-			
-			LOG.info("Parent :" + source.getParent());
-			
-			final File parent = source.getParentFile();
-			final List<File> subtitles = FileUtils.getFileForMatch(parent, FileUtils.SUBPATTERN);
-			File subFile;
-			for (final File subtitle : subtitles) {
-				if (subtitles.size() == 1 || subtitle.getName().contains("english") || subtitle.getName().contains("eng")) {
-					LOG.info("Subtitle file found");
-					subFile = new File(new StringBuilder(movieNameNoExt).append(".en").append(subtitle.getName().substring(subtitle.getName().lastIndexOf('.'))).toString());
-					subtitle.renameTo(subFile);
-				}
-			}
+			destination = processMovie(source, ext, fileName, uppercase);
 			
 		}
 
@@ -102,6 +52,111 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 		ProcessUtils.updateDatebase(destination.getAbsolutePath(), fileTypeStr);
 		ProcessUtils.checkSendEmail(exchange, source, destination.getAbsolutePath());
 		ProcessUtils.sendNotifications("Finished File '" + destination.getName() + "' Sorted as a '" + fileTypeStr + "'");
+	}
+
+	/**
+	 * 
+	 * @param nameMatcher
+	 * @param ext
+	 * @param fileName
+	 * @param uppercase
+	 * @return
+	 */
+	private File processSeries(final Matcher nameMatcher, final String ext, final String fileName,
+			final boolean uppercase) {
+		final File destination;
+		final String seriesName = FileUtils.getSeriesName(fileName, uppercase);
+		final File seriesDir = new File(series);
+		LOG.info("Series Name :" + seriesName);
+		File seriesFolder = FileUtils.getExistingFolder(seriesName, seriesDir);
+		final String seasonAndEpisodeNumber = nameMatcher.group();
+		if (seriesFolder == null) {
+			seriesFolder = new File(series + seriesName);
+			seriesFolder.mkdir();
+			LOG.info("Created Series Folder");
+		} else {
+			LOG.info("Found Series Folder");
+		}
+		destination = getSeasonDestination(ext, seriesName, seriesFolder, seasonAndEpisodeNumber);
+		return destination;
+	}
+
+	/**
+	 * 
+	 * @param source
+	 * @param ext
+	 * @param fileName
+	 * @param uppercase
+	 * @return
+	 */
+	private File processMovie(final File source, final String ext, final String fileName, final boolean uppercase) {
+		final File destination;
+		LOG.info("File Name :" + fileName);
+		String movieName = FileUtils.getMovieName(fileName, uppercase);
+		LOG.info("New File Name :" + movieName);
+		final Matcher matches = FileUtils.YEARPATTERN.matcher(movieName);
+		if (matches.find()) {
+			LOG.info("Found Year String");
+			movieName = new StringBuilder(movieName.split(FileUtils.YEARREGEX)[0]).append("(").append(matches.group()).append(")").toString().trim();
+			LOG.info("New File Name :" + movieName);
+		}
+		
+		final File moviesDir = new File(movies);
+		File moviesFolder = FileUtils.getExistingFolder(movieName, moviesDir);
+		
+		
+		if (moviesFolder == null) {
+			moviesFolder = new File(movies + movieName);
+			moviesFolder.mkdir();
+			LOG.info("Created Movies Folder");
+		} else {
+			LOG.info("Found Movies Folder");
+		}
+		
+		final String movieNameNoExt = new StringBuilder(moviesFolder.getAbsolutePath()).append(File.separatorChar).append(movieName).toString();
+		destination = new File(new StringBuilder(movieNameNoExt).append(ext).toString());
+		
+		LOG.info("Parent :" + source.getParent());
+		
+		final File parent = source.getParentFile();
+		final List<File> subtitles = FileUtils.getFileForMatch(parent, FileUtils.SUBPATTERN);
+		File subFile;
+		for (final File subtitle : subtitles) {
+			if (subtitles.size() == 1 || subtitle.getName().contains("english") || subtitle.getName().contains("eng")) {
+				LOG.info("Subtitle file found");
+				subFile = new File(new StringBuilder(movieNameNoExt).append(".en").append(subtitle.getName().substring(subtitle.getName().lastIndexOf('.'))).toString());
+				subtitle.renameTo(subFile);
+			}
+		}
+		return destination;
+	}
+
+	/**
+	 * 
+	 * @param ext
+	 * @param seriesName
+	 * @param seriesFolder
+	 * @param seasonAndEpisodeNumber
+	 * @return
+	 */
+	private File getSeasonDestination(final String ext, final String seriesName, File seriesFolder,
+			final String seasonAndEpisodeNumber) {
+		final File destination;
+		final String season = FileUtils.getSeasonName(seasonAndEpisodeNumber);
+		LOG.info("Season :" + season);
+		File seasonFolder = FileUtils.getExistingFolder(season, seriesFolder);
+		if (seasonFolder == null) {
+			seasonFolder = new File(new StringBuilder(seriesFolder.getAbsolutePath()).append(File.separatorChar).append(season).toString());
+			seasonFolder.mkdir();
+			
+			destination = new File(new StringBuilder(seasonFolder.getAbsolutePath()).append(File.separatorChar).append(seriesName)
+					.append(" ").append(seasonAndEpisodeNumber.toUpperCase()).append(ext).toString());
+			
+		} else {
+			destination = new File(new StringBuilder(seasonFolder.getAbsolutePath()).append(File.separatorChar).append(seriesName)
+					.append(" ").append(seasonAndEpisodeNumber.toUpperCase()).append(ext).toString());
+		}
+		return destination;
 	}
 
 }

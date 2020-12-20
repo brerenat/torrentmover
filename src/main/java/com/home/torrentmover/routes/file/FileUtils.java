@@ -23,11 +23,13 @@ public class FileUtils {
 	public static final String MOVIEREGEX = ".*\\d{4}([^p])";
 	public static final String SUBREGEX = ".*\\.srt|.*\\.smi|.*\\.ssa|.*\\.ass|.*\\.vtt";
 	public static final String YEARREGEX = "\\d{4}";
+	public static final String SEASONREGEX = "[Ss]\\d{1,}";
 
 	public static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
 	public static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX);
 	public static final Pattern SUBPATTERN = Pattern.compile(SUBREGEX);
 	public static final Pattern YEARPATTERN = Pattern.compile(YEARREGEX);
+	public static final Pattern SEASONPATTERN = Pattern.compile(SEASONREGEX);
 	private static final ExtensionFilter EXT_FILTER = new ExtensionFilter();
 
 	/**
@@ -183,15 +185,15 @@ public class FileUtils {
 	
 	/**
 	 * 
-	 * @param seriesName
-	 * @param seriesDir
+	 * @param nameToCheck
+	 * @param dirToCheck
 	 * @return
 	 */
-	public static File getExistingFolder(String seriesName, final File seriesDir) {
+	public static File getExistingFolder(String nameToCheck, final File dirToCheck) {
 		File seriesFolderFound = null;
-		for (final File dir : seriesDir.listFiles()) {
+		for (final File dir : dirToCheck.listFiles()) {
 			if (dir.isDirectory()
-					&& (dir.getName().equalsIgnoreCase(seriesName) || dir.getName().contains(seriesName))) {
+					&& (dir.getName().equalsIgnoreCase(nameToCheck) || dir.getName().contains(nameToCheck))) {
 				seriesFolderFound = dir;
 			}
 		}
@@ -216,5 +218,21 @@ public class FileUtils {
 			}
 		}
 		return files;
+	}
+	
+	/**
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public static String getSeasonName(final String fileName) {
+		Matcher match = SEASONPATTERN.matcher(fileName);
+		final String season;
+		if (match.find()) {
+			season = match.group().toLowerCase().replace("s", "Season ");
+		} else {
+			season = "";
+		}
+		return season;
 	}
 }
