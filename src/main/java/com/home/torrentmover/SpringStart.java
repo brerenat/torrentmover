@@ -46,7 +46,7 @@ public class SpringStart {
 
 	public static void main(String[] args) {
 
-		try (final InputStream input = new FileInputStream("config.properties")) {
+		try (final InputStream input = new FileInputStream("application.properties")) {
 			prop = new Properties();
 			prop.load(input);
 
