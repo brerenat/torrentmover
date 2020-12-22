@@ -236,12 +236,16 @@ public class FileUtils {
 		return season;
 	}
 	
+	/**
+	 * 
+	 * @param file
+	 */
 	public static void createDir(final File file) {
 		if (!file.exists()) {
 			file.mkdirs();
-			file.setExecutable(true);
-			file.setReadable(true);
-			file.setWritable(true);
+			file.setExecutable(true, false);
+			file.setReadable(true, false);
+			file.setWritable(true, false);
 		}
 	}
 }
