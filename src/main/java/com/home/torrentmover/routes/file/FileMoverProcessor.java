@@ -72,7 +72,7 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 		final String seasonAndEpisodeNumber = nameMatcher.group();
 		if (seriesFolder == null) {
 			seriesFolder = new File(series + seriesName);
-			seriesFolder.mkdir();
+			FileUtils.createDir(seriesFolder);
 			LOG.info("Created Series Folder");
 		} else {
 			LOG.info("Found Series Folder");
@@ -107,7 +107,7 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 		
 		if (moviesFolder == null) {
 			moviesFolder = new File(movies + movieName);
-			moviesFolder.mkdir();
+			FileUtils.createDir(moviesFolder);
 			LOG.info("Created Movies Folder");
 		} else {
 			LOG.info("Found Movies Folder");
@@ -147,7 +147,7 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 		File seasonFolder = FileUtils.getExistingFolder(season, seriesFolder);
 		if (seasonFolder == null) {
 			seasonFolder = new File(new StringBuilder(seriesFolder.getAbsolutePath()).append(File.separatorChar).append(season).toString());
-			seasonFolder.mkdir();
+			FileUtils.createDir(seriesFolder);
 			
 			destination = new File(new StringBuilder(seasonFolder.getAbsolutePath()).append(File.separatorChar).append(seriesName)
 					.append(" ").append(seasonAndEpisodeNumber.toUpperCase()).append(ext).toString());

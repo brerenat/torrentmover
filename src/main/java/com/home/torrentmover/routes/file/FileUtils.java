@@ -235,4 +235,13 @@ public class FileUtils {
 		}
 		return season;
 	}
+	
+	public static void createDir(final File file) {
+		if (!file.exists()) {
+			file.mkdirs();
+			file.setExecutable(true);
+			file.setReadable(true);
+			file.setWritable(true);
+		}
+	}
 }
