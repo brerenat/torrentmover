@@ -9,6 +9,7 @@ import org.apache.camel.component.file.GenericFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.home.mydb.utils.ProcessUtils;
 import com.home.torrentmover.SpringStart;
 
 public class FileMoverProcessor extends AbstractFileMoverProcessor {

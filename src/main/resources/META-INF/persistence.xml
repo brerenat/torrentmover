@@ -6,9 +6,9 @@
   version="2.1">
 	<persistence-unit name="torrentmover" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
-		<class>com.home.torrentmover.model.FileType</class>
-		<class>com.home.torrentmover.model.ProcessedFile</class>
-		<class>com.home.torrentmover.model.SubscriptionDTO</class>
+		<class>com.home.mydb.model.FileType</class>
+		<class>com.home.mydb.model.ProcessedFile</class>
+		<class>com.home.mydb.model.SubscriptionDTO</class>
 		<properties>
 	        <property name="hibernate.hbm2ddl.auto" value="update"/>
 		</properties>

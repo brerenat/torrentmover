@@ -12,6 +12,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.home.mydb.utils.ProcessUtils;
 import com.home.torrentmover.SpringStart;
 
 public class FTPFileMoverProcessor extends AbstractFileMoverProcessor {
@@ -90,7 +91,6 @@ public class FTPFileMoverProcessor extends AbstractFileMoverProcessor {
 		LOG.info("New File Name :" + destination);
 
 		ProcessUtils.updateDatebase(destination, fileTypeStr);
-		ProcessUtils.checkSendEmail(exchange, source, destination);
 	}
 
 }
