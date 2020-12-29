@@ -9,6 +9,7 @@ import org.apache.camel.component.file.GenericFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.home.mydb.utils.ProcessUtils;
 import com.home.torrentmover.SpringStart;
 
 public class FileMoverProcessor extends AbstractFileMoverProcessor {
@@ -50,8 +51,6 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 		LOG.info("New File Name :" + destination.getAbsoluteFile());
 
 		ProcessUtils.updateDatebase(destination.getAbsolutePath(), fileTypeStr);
-		ProcessUtils.checkSendEmail(exchange, source, destination.getAbsolutePath());
-		ProcessUtils.sendNotifications("Finished File '" + destination.getName() + "' Sorted as a '" + fileTypeStr + "'");
 	}
 
 	/**
@@ -147,7 +146,7 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 		File seasonFolder = FileUtils.getExistingFolder(season, seriesFolder);
 		if (seasonFolder == null) {
 			seasonFolder = new File(new StringBuilder(seriesFolder.getAbsolutePath()).append(File.separatorChar).append(season).toString());
-			FileUtils.createDir(seriesFolder);
+			FileUtils.createDir(seasonFolder);
 			
 			destination = new File(new StringBuilder(seasonFolder.getAbsolutePath()).append(File.separatorChar).append(seriesName)
 					.append(" ").append(seasonAndEpisodeNumber.toUpperCase()).append(ext).toString());
