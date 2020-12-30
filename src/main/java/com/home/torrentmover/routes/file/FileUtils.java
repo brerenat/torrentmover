@@ -19,11 +19,11 @@ public class FileUtils {
 	private static final long SLEEPTIME = 1000L;
 	private static final Logger LOG = LoggerFactory.getLogger(FileUtils.class);
 
-	public static final String EPISODEREGEX = "[Ss]\\d{1,}[Ee]\\d{1,}";
+	public static final String EPISODEREGEX = ".*[Ss]\\d{1,}[Ee]\\d{1,}";
 	public static final String MOVIEREGEX = ".*\\d{4}([^p])";
 	public static final String SUBREGEX = ".*\\.srt|.*\\.smi|.*\\.ssa|.*\\.ass|.*\\.vtt";
-	public static final String YEARREGEX = "\\d{4}";
-	public static final String SEASONREGEX = "[Ss]\\d{1,}";
+	public static final String YEARREGEX = ".*\\d{4}";
+	public static final String SEASONREGEX = ".*[Ss]\\d{1,}";
 
 	public static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
 	public static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX);
