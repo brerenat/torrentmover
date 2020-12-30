@@ -21,13 +21,13 @@ public class FileUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(FileUtils.class);
 
 	public static final String EPISODEREGEX = "[Ss]\\d{1,}[Ee]\\d{1,}";
-	public static final String MOVIEREGEX = ".*\\d{4}([^p])";
+	public static final String MOVIEREGEX = ".{1,}\\d{4}([^p])";
 	public static final String SUBREGEX = ".*\\.srt|.*\\.smi|.*\\.ssa|.*\\.ass|.*\\.vtt";
 	public static final String YEARREGEX = "\\d{4}";
 	public static final String SEASONREGEX = "[Ss]\\d{1,}";
 
 	public static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
-	public static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX);
+	public static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX, Pattern.MULTILINE);
 	public static final Pattern SUBPATTERN = Pattern.compile(SUBREGEX);
 	public static final Pattern YEARPATTERN = Pattern.compile(YEARREGEX);
 	public static final Pattern SEASONPATTERN = Pattern.compile(SEASONREGEX);
@@ -130,12 +130,14 @@ public class FileUtils {
 		} else {
 			newFileName = removeSpecialChars(fileName);
 		}
+		LOG.info("Starting Matching on :" + newFileName);
 		final Matcher matches = MOVIEPATTERN.matcher(newFileName);
 		if (matches.find()) {
 			MatchResult matchRes = matches.toMatchResult();
-			LOG.info("End :" + matches.end());
-			while (matches.find(matches.end())) {
+			LOG.info("First Match :" + matchRes.group());
+			while (matches.find(matches.end() -1)) {
 				matchRes = matches.toMatchResult();
+				LOG.info("Another Match :" + matchRes.group());
 			}
 			final String match = matchRes.group();
 			LOG.info("Found Year String :" + match);
