@@ -2,6 +2,7 @@ package com.home.torrentmover.routes.file;
 
 import java.io.File;
 import java.util.List;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 
 import org.apache.camel.Exchange;
@@ -95,8 +96,19 @@ public class FileMoverProcessor extends AbstractFileMoverProcessor {
 		LOG.info("New File Name :" + movieName);
 		final Matcher matches = FileUtils.YEARPATTERN.matcher(movieName);
 		if (matches.find()) {
+			MatchResult matchRes = matches.toMatchResult();
+			LOG.info("End :" + matches.end());
+			while (matches.find(matches.end())) {
+				LOG.info("Group :" + matches.group());
+				matchRes = matches.toMatchResult();
+			}
+			
+			LOG.info("Movie Split :" + movieName.split(matchRes.group()).length);
+			for (String name : movieName.split(matchRes.group())) {
+				LOG.info("Name :" + name);
+			}
 			LOG.info("Found Year String");
-			movieName = new StringBuilder(movieName.split(FileUtils.YEARREGEX)[0]).append("(").append(matches.group()).append(")").toString().trim();
+			movieName = new StringBuilder(movieName.split(matchRes.group())[0]).append("(").append(matchRes.group()).append(")").toString().trim();
 			LOG.info("New File Name :" + movieName);
 		}
 		

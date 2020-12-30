@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,11 +20,11 @@ public class FileUtils {
 	private static final long SLEEPTIME = 1000L;
 	private static final Logger LOG = LoggerFactory.getLogger(FileUtils.class);
 
-	public static final String EPISODEREGEX = ".*[Ss]\\d{1,}[Ee]\\d{1,}";
+	public static final String EPISODEREGEX = "[Ss]\\d{1,}[Ee]\\d{1,}";
 	public static final String MOVIEREGEX = ".*\\d{4}([^p])";
 	public static final String SUBREGEX = ".*\\.srt|.*\\.smi|.*\\.ssa|.*\\.ass|.*\\.vtt";
-	public static final String YEARREGEX = ".*\\d{4}";
-	public static final String SEASONREGEX = ".*[Ss]\\d{1,}";
+	public static final String YEARREGEX = "\\d{4}";
+	public static final String SEASONREGEX = "[Ss]\\d{1,}";
 
 	public static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
 	public static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX);
@@ -131,7 +132,12 @@ public class FileUtils {
 		}
 		final Matcher matches = MOVIEPATTERN.matcher(newFileName);
 		if (matches.find()) {
-			final String match = matches.group();
+			MatchResult matchRes = matches.toMatchResult();
+			LOG.info("End :" + matches.end());
+			while (matches.find(matches.end())) {
+				matchRes = matches.toMatchResult();
+			}
+			final String match = matchRes.group();
 			LOG.info("Found Year String :" + match);
 			newFileName = match.trim();
 			LOG.info("New File Name :" + newFileName);
