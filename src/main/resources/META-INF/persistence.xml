@@ -5,10 +5,11 @@
                                  http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
   version="2.1">
 	<persistence-unit name="torrentmover" transaction-type="RESOURCE_LOCAL">
-		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 		<class>com.home.mydb.model.FileType</class>
 		<class>com.home.mydb.model.ProcessedFile</class>
 		<class>com.home.mydb.model.SubscriptionDTO</class>
+		<class>com.home.mydb.model.ReferenceData</class>
 		<properties>
 	        <property name="hibernate.hbm2ddl.auto" value="update"/>
 		</properties>
