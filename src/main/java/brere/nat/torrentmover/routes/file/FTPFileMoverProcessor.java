@@ -1,4 +1,4 @@
-package com.home.torrentmover.routes.file;
+package brere.nat.torrentmover.routes.file;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,8 +12,8 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.home.mydb.utils.ProcessUtils;
-import com.home.torrentmover.SpringStart;
+import brere.nat.mydb.utils.ProcessUtils;
+import brere.nat.torrentmover.SpringStart;
 
 public class FTPFileMoverProcessor extends AbstractFileMoverProcessor {
 

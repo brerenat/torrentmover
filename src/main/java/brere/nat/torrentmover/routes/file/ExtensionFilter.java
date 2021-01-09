@@ -1,4 +1,4 @@
-package com.home.torrentmover.routes.file;
+package brere.nat.torrentmover.routes.file;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -8,7 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.home.torrentmover.SpringStart;
+import brere.nat.torrentmover.SpringStart;
 
 public class ExtensionFilter implements FilenameFilter {
 	private static final Logger LOG = LoggerFactory.getLogger(ExtensionFilter.class);

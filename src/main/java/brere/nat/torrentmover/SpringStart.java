@@ -1,4 +1,4 @@
-package com.home.torrentmover;
+package brere.nat.torrentmover;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.home.mydb.utils.ProcessUtils;
+import brere.nat.mydb.utils.ProcessUtils;
 
 @SpringBootApplication
 public class SpringStart {

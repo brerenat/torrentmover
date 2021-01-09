@@ -1,11 +1,11 @@
-package com.home.torrentmover.routes.file;
+package brere.nat.torrentmover.routes.file;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.home.torrentmover.SpringStart;
+import brere.nat.torrentmover.SpringStart;
 
 @Component
 public class FileMover extends RouteBuilder {

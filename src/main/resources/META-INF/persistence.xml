@@ -6,10 +6,12 @@
   version="2.1">
 	<persistence-unit name="torrentmover" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-		<class>com.home.mydb.model.FileType</class>
-		<class>com.home.mydb.model.ProcessedFile</class>
-		<class>com.home.mydb.model.SubscriptionDTO</class>
-		<class>com.home.mydb.model.ReferenceData</class>
+		<class>brere.nat.mydb.model.FileType</class>
+		<class>brere.nat.mydb.model.ProcessedFile</class>
+		<class>brere.nat.mydb.model.SubscriptionDTO</class>
+		<class>brere.nat.mydb.model.ReferenceData</class>
+		<class>brere.nat.mydb.model.AutoPollDownload</class>
+		<class>brere.nat.mydb.model.AutoPollSeries</class>
 		<properties>
 	        <property name="hibernate.hbm2ddl.auto" value="update"/>
 		</properties>

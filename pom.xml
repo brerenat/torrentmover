@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.home</groupId>
+	<groupId>brere.nat</groupId>
 	<artifactId>torrentmover</artifactId>
-	<version>0.0.12</version>
+	<version>0.0.13-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>torrentmover</name>
@@ -39,7 +39,7 @@
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>com.home.torrentmover.SpringStart</mainClass>
+							<mainClass>brere.nat.torrentmover.SpringStart</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -135,7 +135,7 @@
 			<artifactId>spring-boot-starter-undertow</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
@@ -190,11 +190,11 @@
 			<artifactId>commons-net</artifactId>
 			<version>3.6</version>
 		</dependency>
-
+		
 		<dependency>
-			<groupId>com.home</groupId>
+			<groupId>brere.nat</groupId>
 			<artifactId>mydbDAO</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
