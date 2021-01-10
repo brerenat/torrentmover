@@ -11,6 +11,9 @@ public class SeriesTracker extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		LOG.info("Started Series Tracker Configure");
+		
+		from("quartz://tracker/series?cron={{tracker.quartz.cron}}").process(new SeriesTrackerProcessor())
+		.end();
 	}
 
 }

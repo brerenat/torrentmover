@@ -25,12 +25,14 @@ public class FileUtils {
 	public static final String SUBREGEX = ".*\\.srt|.*\\.smi|.*\\.ssa|.*\\.ass|.*\\.vtt";
 	public static final String YEARREGEX = "\\d{4}";
 	public static final String SEASONREGEX = "[Ss]\\d{1,}";
+	public static final String EP_ONLY_REGEX = "[Ee]\\d{1,}";
 
 	public static final Pattern EPISODEPATTERN = Pattern.compile(EPISODEREGEX);
 	public static final Pattern MOVIEPATTERN = Pattern.compile(MOVIEREGEX, Pattern.MULTILINE);
 	public static final Pattern SUBPATTERN = Pattern.compile(SUBREGEX);
 	public static final Pattern YEARPATTERN = Pattern.compile(YEARREGEX);
 	public static final Pattern SEASONPATTERN = Pattern.compile(SEASONREGEX);
+	public static final Pattern EP_ONLY_PATTERN = Pattern.compile(EP_ONLY_REGEX);
 	private static final ExtensionFilter EXT_FILTER = new ExtensionFilter();
 
 	/**

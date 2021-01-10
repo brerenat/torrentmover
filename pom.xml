@@ -109,6 +109,13 @@
 			<version>${camel.version}</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.apache.camel/camel-quartz -->
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-quartz</artifactId>
+			<version>${camel.version}</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.apache.camel/camel-spring-boot-starter -->
 		<dependency>
 			<groupId>org.apache.camel</groupId>
@@ -190,11 +197,29 @@
 			<artifactId>commons-net</artifactId>
 			<version>3.6</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>brere.nat</groupId>
 			<artifactId>mydbDAO</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>brere.nat</groupId>
+			<artifactId>omdbapi</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>brere.nat</groupId>
+			<artifactId>transmission-rpc-simple</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>brere.nat</groupId>
+			<artifactId>torrent-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
