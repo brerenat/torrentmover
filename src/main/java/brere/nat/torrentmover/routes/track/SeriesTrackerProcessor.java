@@ -46,6 +46,7 @@ public class SeriesTrackerProcessor implements Processor {
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
+		LOG.info("Starting to auto Poll Series");
 		final String torrentName = SpringStart.getProp().getProperty("tracker.torrent.name");
 		final TorrentAPI torrentAPI = new TorrentAPI(torrentName);
 		final String rpcHost = SpringStart.getProp().getProperty("tracker.rpc.hostname");
@@ -66,7 +67,9 @@ public class SeriesTrackerProcessor implements Processor {
 		Set<Integer> eps;
 		int maxSeasonNum;
 		SeriesResult omdb;
+		LOG.info("Number of Series to poll :" + series.size());
 		for (final AutoPollSeries item : series) {
+			LOG.info("Polling :" + item.getTitle());
 			item.setSeasonMap(updateSeasonMapFromFileSystem(item.getFolderName()));
 			
 			for (final AutoPollDownload download : item.getActiveDownloads()) {
@@ -82,6 +85,8 @@ public class SeriesTrackerProcessor implements Processor {
 					maxSeasonNum = omdb.getTotalSeasons();
 				}
 			}
+			
+			LOG.info("Max Seasons :" + maxSeasonNum);
 			
 			baseMissingMap = getBaseMissingMap(maxSeasonNum, MAX_EP);
 			missingMap = new HashMap<>();
@@ -118,6 +123,7 @@ public class SeriesTrackerProcessor implements Processor {
 	private void searchWholeSeason(final TorrentAPI torrentAPI, final RPCAPI rpcAPI, final AutoPollSeries item,
 			final Entry<Integer, Set<Integer>> entry)
 			throws TorrentAPIException, URISyntaxException, ClientProtocolException, IOException {
+		LOG.info("Searching whole season :" + entry.getKey());
 		try {
 			getTorrent(torrentAPI, rpcAPI, item, getFullSeasonString(entry.getKey(), SEVEN_TWENTY));
 		} catch (TorrentNotFoundException e) {
@@ -143,6 +149,7 @@ public class SeriesTrackerProcessor implements Processor {
 			final Entry<Integer, Set<Integer>> entry)
 			throws TorrentAPIException, URISyntaxException, ClientProtocolException, IOException {
 		for (final Integer episode : entry.getValue()) {
+			LOG.info("Searching episode :" + getSeasonEpisodeString(entry.getKey(), episode, null));
 			try {
 				getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, SEVEN_TWENTY));
 			} catch (TorrentNotFoundException e) {
@@ -167,7 +174,7 @@ public class SeriesTrackerProcessor implements Processor {
 			throws TorrentAPIException, URISyntaxException, ClientProtocolException, IOException {
 		final List<TorrentResult> torrents = torrentAPI.getTorrentByIMDBIDAndSearch(item.getImdbID(), search);
 		if (torrents != null && !torrents.isEmpty()) {
-			
+			LOG.info("Found torrent, uploading to rpc");
 			rpcAPI.addTorrent(torrents.get(0).getDownload());
 		} else {
 			throw new TorrentNotFoundException("No Torrents found");
