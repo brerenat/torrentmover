@@ -3,7 +3,9 @@ package brere.nat.torrentmover.routes.track;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SeriesTracker extends RouteBuilder {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SeriesTracker.class);
