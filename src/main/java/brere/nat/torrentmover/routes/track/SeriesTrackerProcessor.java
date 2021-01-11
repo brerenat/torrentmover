@@ -117,7 +117,7 @@ public class SeriesTrackerProcessor implements Processor {
 			// missingMap should have all the seasons and episode numbers to search for
 			for (final Entry<Integer, Set<Integer>> entry : missingMap.entrySet()) {
 				LOG.info("Number of Episodes missing for Season " + entry.getKey() + " :" + entry.getValue().size());
-				if (entry.getValue().size() > MAX_EP) {
+				if (entry.getValue().size() != MAX_EP) {
 					searchIndividualEpisode(torrentAPI, rpcAPI, item, entry);
 				} else {
 					// Missing entire season search for whole season
