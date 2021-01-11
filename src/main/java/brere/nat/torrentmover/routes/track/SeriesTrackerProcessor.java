@@ -64,6 +64,7 @@ public class SeriesTrackerProcessor implements Processor {
 		
 		Map<Integer, Set<Integer>> baseMissingMap;
 		Map<Integer, Set<Integer>> missingMap;
+		Map<Integer, Set<Integer>> seasonMap;
 		Set<Integer> eps;
 		int maxSeasonNum;
 		SeriesResult omdb;
@@ -88,17 +89,20 @@ public class SeriesTrackerProcessor implements Processor {
 			
 			LOG.info("Max Seasons :" + maxSeasonNum);
 			
+			seasonMap = item.getSeasonMap();
 			baseMissingMap = getBaseMissingMap(maxSeasonNum, MAX_EP);
 			missingMap = new HashMap<>();
 			for (final Entry<Integer, Set<Integer>> entry : baseMissingMap.entrySet()) {
-				if (!item.getSeasonMap().containsKey(entry.getKey())) {
+				if (!seasonMap.containsKey(entry.getKey())) {
 					// Don't have this season
+					LOG.info("Don't have season " + entry.getKey());
 					missingMap.put(entry.getKey(), entry.getValue());
 				} else {
 					// Have this season
-					for (final Integer episode : item.getSeasonMap().get(entry.getKey())) {
+					LOG.info(seasonMap.get(entry.getKey()).size() + " Eps for Season :" + entry.getKey());
+					for (final Integer episode : entry.getValue()) {
 						// Don't have this episode
-						if (!entry.getValue().contains(episode)) {
+						if (!seasonMap.get(entry.getKey()).contains(episode)) {
 							// Add this season if not already should always have it at this point
 							eps = missingMap.getOrDefault(entry.getKey(), new HashSet<>());
 							eps.add(episode);
@@ -237,36 +241,50 @@ public class SeriesTrackerProcessor implements Processor {
 	 * @param item
 	 * @throws IOException
 	 */
-	private Map<Integer, Set<Integer>> updateSeasonMapFromFileSystem(final String folder) throws IOException {
+	public Map<Integer, Set<Integer>> updateSeasonMapFromFileSystem(final String folder) throws Exception {
 		final Map<Integer, Set<Integer>> seasonMap = new HashMap<>();
 		int seasonNum;
 		int epNum;
 		Matcher matches;
 		Set<Integer> eps;
+		String seasonName;
+		String episodeName;
+		String fileName;
 		final Path seriesFolder = Paths.get(folder);
 		if (Files.exists(seriesFolder)) {
 			Files.createDirectories(seriesFolder);
 			setPermissions(seriesFolder);
 		}
+		
+		LOG.info("Series dir :" + seriesFolder);
 		try (final DirectoryStream<Path> dirs = Files.newDirectoryStream(seriesFolder)) {
 			for (final Path seasonDir : dirs) {
-				if (seasonDir.startsWith("Season ")) {
-					seasonNum = Integer.valueOf(seasonDir.getFileName().toString().replace("Season ", ""));
+				seasonName = seasonDir.getFileName().toString();
+				LOG.info("Folder :" + seasonName);
+				if (seasonName.startsWith("Season ")) {
+					LOG.info("Is Season");
+					seasonNum = Integer.valueOf(seasonName.toString().replace("Season ", ""));
+					LOG.info("Season Number :" + seasonNum);
 					try (final DirectoryStream<Path> files = Files.newDirectoryStream(seasonDir)) {
 						for (final Path file : files) {
-							matches = FileUtils.EP_ONLY_PATTERN.matcher(file.getFileName().toString());
+							fileName = file.getFileName().toString();
+							LOG.info("File under " + seasonName + " :" + fileName);
+							matches = FileUtils.EP_ONLY_PATTERN.matcher(fileName);
+							LOG.info("Trying Match");
 							if (matches.find()) {
-								epNum = Integer.valueOf(matches.group().replaceAll(EE, ""));
+								episodeName = matches.group();
+								LOG.info("Found Match :" + episodeName);
+								epNum = Integer.valueOf(episodeName.replaceAll(EE, ""));
 								eps = seasonMap.getOrDefault(seasonNum, new HashSet<>());
 								eps.add(epNum);
 								seasonMap.put(seasonNum, eps);
 							}
 						}
-						
 					}
 				}
 			}
 		}
+		LOG.info("Out Season Map :" + seasonMap);
 		return seasonMap;
 	}
 
