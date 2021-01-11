@@ -108,9 +108,12 @@ public class SeriesTrackerProcessor implements Processor {
 				}
 			}
 			
+			LOG.info(item.getTitle() + " Missing Map :" + missingMap);
+			
 			// missingMap should have all the seasons and episode numbers to search for
 			for (final Entry<Integer, Set<Integer>> entry : missingMap.entrySet()) {
-				if (entry.getValue().size() != MAX_EP) {
+				LOG.info("Number of Episodes missing for Season " + entry.getKey() + " :" + entry.getValue().size());
+				if (entry.getValue().size() > MAX_EP) {
 					searchIndividualEpisode(torrentAPI, rpcAPI, item, entry);
 				} else {
 					// Missing entire season search for whole season
@@ -186,7 +189,7 @@ public class SeriesTrackerProcessor implements Processor {
 		if (season < 10) {
 			str.append("0");
 		}
-		str.append(season);
+		str.append(season).append("E");
 		if (episode < 10) {
 			str.append("0");
 		}
@@ -220,7 +223,7 @@ public class SeriesTrackerProcessor implements Processor {
 		Set<Integer> episodes;
 		for (int i = 1; i <= maxSeason; i++) {
 			episodes = new HashSet<>();
-			for (int j = 1; j <= maxSeason; j++) {
+			for (int j = 1; j <= maxEpisode; j++) {
 				episodes.add(j);
 			}
 			map.put(i, episodes);
