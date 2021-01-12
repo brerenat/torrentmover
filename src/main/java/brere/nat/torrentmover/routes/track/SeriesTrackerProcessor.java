@@ -75,7 +75,14 @@ public class SeriesTrackerProcessor implements Processor {
 			
 			for (final AutoPollDownload download : item.getActiveDownloads()) {
 				eps = item.getSeasonMap().getOrDefault(download.getSeason(), new HashSet<>());
-				eps.add(download.getEpisode());
+				if (download.getEpisode() != 0) {
+					eps.add(download.getEpisode());
+				} else {
+					for (int i = 0; i <= MAX_EP; i++) {
+						eps.add(i);
+					}
+				}
+				
 				item.getSeasonMap().put(download.getSeason(), eps);
 			}
 			
@@ -132,17 +139,17 @@ public class SeriesTrackerProcessor implements Processor {
 			throws TorrentAPIException, URISyntaxException, ClientProtocolException, IOException {
 		LOG.info("Searching whole season :" + entry.getKey());
 		try {
-			getTorrent(torrentAPI, rpcAPI, item, getFullSeasonString(entry.getKey(), SEVEN_TWENTY));
+			getTorrent(torrentAPI, rpcAPI, item, getFullSeasonString(entry.getKey(), SEVEN_TWENTY), entry.getKey(), 0);
 		} catch (TorrentNotFoundException e) {
 			LOG.warn("Couldn't find a torrent for " + item.getTitle() + " " + getFullSeasonString(entry.getKey(), SEVEN_TWENTY));
 			
 			try {
-				getTorrent(torrentAPI, rpcAPI, item, getFullSeasonString(entry.getKey(), TEN_EIGHTY));
+				getTorrent(torrentAPI, rpcAPI, item, getFullSeasonString(entry.getKey(), TEN_EIGHTY), entry.getKey(), 0);
 			} catch (TorrentNotFoundException e2) {
 				LOG.warn("Couldn't find a torrent for " + item.getTitle() + " " + getFullSeasonString(entry.getKey(), TEN_EIGHTY));
 				
 				try {
-					getTorrent(torrentAPI, rpcAPI, item, getFullSeasonString(entry.getKey(), null));
+					getTorrent(torrentAPI, rpcAPI, item, getFullSeasonString(entry.getKey(), null), entry.getKey(), 0);
 				} catch (TorrentNotFoundException e3) {
 					LOG.warn("Couldn't find a torrent for " + item.getTitle() + " " + getFullSeasonString(entry.getKey(), null));
 					LOG.warn("Couldn't find whole season, searching individually");
@@ -158,16 +165,16 @@ public class SeriesTrackerProcessor implements Processor {
 		for (final Integer episode : entry.getValue()) {
 			LOG.info("Searching episode :" + getSeasonEpisodeString(entry.getKey(), episode, null));
 			try {
-				getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, SEVEN_TWENTY));
+				getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, SEVEN_TWENTY), entry.getKey(), episode);
 			} catch (TorrentNotFoundException e) {
 				LOG.warn("Couldn't find a torrent for " + item.getTitle() + " " + getSeasonEpisodeString(entry.getKey(), episode, SEVEN_TWENTY));
 				
 				try {
-					getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, TEN_EIGHTY));
+					getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, TEN_EIGHTY), entry.getKey(), episode);
 				} catch (TorrentNotFoundException e2) {
 					LOG.warn("Couldn't find a torrent for " + item.getTitle() + " " + getSeasonEpisodeString(entry.getKey(), episode, TEN_EIGHTY));
 					try {
-						getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, null));
+						getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, null), entry.getKey(), episode);
 					} catch (TorrentNotFoundException e3) {
 						LOG.warn("Couldn't find a torrent for " + item.getTitle() + " " + getSeasonEpisodeString(entry.getKey(), episode, null));
 					}
@@ -177,12 +184,18 @@ public class SeriesTrackerProcessor implements Processor {
 	}
 
 	private void getTorrent(final TorrentAPI torrentAPI, final RPCAPI rpcAPI, final AutoPollSeries item,
-			final String search)
+			final String search, final int seasonNum, final int epNum)
 			throws TorrentAPIException, URISyntaxException, ClientProtocolException, IOException {
 		final List<TorrentResult> torrents = torrentAPI.getTorrentByIMDBIDAndSearch(item.getImdbID(), search);
 		if (torrents != null && !torrents.isEmpty()) {
 			LOG.info("Found torrent, uploading to rpc");
 			rpcAPI.addTorrent(torrents.get(0).getDownload());
+			
+			final AutoPollDownload downloaded = new AutoPollDownload(item);
+			downloaded.setSeason(seasonNum);
+			downloaded.setEpisode(epNum);
+			item.getActiveDownloads().add(downloaded);
+			SpringStart.getEm().persist(downloaded);
 		} else {
 			throw new TorrentNotFoundException("No Torrents found");
 		}
