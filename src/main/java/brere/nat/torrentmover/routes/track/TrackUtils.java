@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Matcher;
 
 import javax.persistence.EntityManager;
 
@@ -164,14 +163,14 @@ public class TrackUtils {
 		final List<TorrentResult> torrents = torrentAPI.getTorrentByIMDBIDAndSearch(item.getImdbID(), search);
 		
 		if (torrents != null && !torrents.isEmpty()) {
-			Matcher match;
+			boolean match;
 			AutoPollDownload downloaded;
 			boolean started = false;
 			for (TorrentResult torrent : torrents) {
 				LOG.info("Title :" + torrent.getTitle());
-				match = FileUtils.EPISODEPATTERN.matcher(torrent.getTitle());
+				match = FileUtils.EPISODEPATTERN.matcher(torrent.getTitle()).find();
 				LOG.info("Ep Number :" + epNum);
-				if (epNum != 0 && !match.find()) {
+				if ((epNum == 0 && !match) || (epNum != 0 && match)) {
 					LOG.info("Found torrent, uploading to rpc");
 					rpcAPI.addTorrent(torrent.getDownload());
 					
