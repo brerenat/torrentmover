@@ -180,6 +180,7 @@ public class TrackUtils {
 					em.persist(downloaded);
 					LOG.info("Saving AutoPollDownload");
 					started = true;
+					break;
 				}
 			}
 			
