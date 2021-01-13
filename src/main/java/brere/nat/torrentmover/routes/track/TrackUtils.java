@@ -164,22 +164,24 @@ public class TrackUtils {
 		final List<TorrentResult> torrents = torrentAPI.getTorrentByIMDBIDAndSearch(item.getImdbID(), search);
 		
 		if (torrents != null && !torrents.isEmpty()) {
-			LOG.info("Title :" + torrents.get(0).getTitle());
-			Matcher match = FileUtils.EPISODEPATTERN.matcher(torrents.get(0).getTitle());
-			LOG.info("Ep Number :" + epNum);
-			if (epNum == 0 && match.find()) {
-				throw new TorrentNotFoundException("Found Episode " + match.group() + " when looking for Season " + seasonNum);
-			} else {
-				LOG.info("In the Else");
+			Matcher match;
+			AutoPollDownload downloaded;
+			for (TorrentResult torrent : torrents) {
+				LOG.info("Title :" + torrent.getTitle());
+				match = FileUtils.EPISODEPATTERN.matcher(torrent.getTitle());
+				LOG.info("Ep Number :" + epNum);
+				if (epNum != 0 && !match.find() && torrent.getSeeders() > 2) {
+					LOG.info("Found torrent, uploading to rpc");
+					rpcAPI.addTorrent(torrent.getDownload());
+					
+					downloaded = new AutoPollDownload(item);
+					downloaded.setSeason(seasonNum);
+					downloaded.setEpisode(epNum);
+					em.persist(downloaded);
+					LOG.info("Saving AutoPollDownload");
+				}
 			}
-			LOG.info("Found torrent, uploading to rpc");
-			rpcAPI.addTorrent(torrents.get(0).getDownload());
 			
-			final AutoPollDownload downloaded = new AutoPollDownload(item);
-			downloaded.setSeason(seasonNum);
-			downloaded.setEpisode(epNum);
-			em.persist(downloaded);
-			LOG.info("Saving AutoPollDownload");
 		} else {
 			throw new TorrentNotFoundException("No Torrents found");
 		}
