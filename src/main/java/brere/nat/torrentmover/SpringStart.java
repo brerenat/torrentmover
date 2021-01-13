@@ -39,18 +39,18 @@ public class SpringStart {
 			prop = new Properties();
 			prop.load(input);
 
-			Object dbUse = prop.get("database.use");
+			final Object dbUse = prop.get("database.use");
 
 			LOG.info("DB Use :"+ dbUse);
 			if (dbUse != null && "true".contentEquals(dbUse.toString())) {
-				EntityManagerFactory factory = Persistence.createEntityManagerFactory("torrentmover", prop);
+				final EntityManagerFactory factory = Persistence.createEntityManagerFactory(prop.getProperty("persistence.unit"), prop);
 				ProcessUtils.setEmf(factory);
 			}
 
 		} catch (Exception e) {
 			LOG.error("Exception when loading Properties", e);
 		}
-
+		
 		SpringApplication.run(SpringStart.class, args);
 		LOG.info("Started Spring Application");
 		
