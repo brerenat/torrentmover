@@ -44,7 +44,7 @@ public class SpringStart {
 			LOG.info("DB Use :"+ dbUse);
 			if (dbUse != null && "true".contentEquals(dbUse.toString())) {
 				EntityManagerFactory factory = Persistence.createEntityManagerFactory("torrentmover", prop);
-				ProcessUtils.setEm(factory.createEntityManager());
+				ProcessUtils.setEmf(factory);
 			}
 
 		} catch (Exception e) {

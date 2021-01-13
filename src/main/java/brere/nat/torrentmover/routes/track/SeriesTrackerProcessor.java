@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import brere.nat.mydb.model.AutoPollDownload;
 import brere.nat.mydb.model.AutoPollSeries;
+import brere.nat.mydb.utils.ProcessUtils;
 import brere.nat.omdbapi.api.OMDBAPI;
 import brere.nat.omdbapi.model.SeriesResult;
 import brere.nat.torrent.api.TorrentAPI;
@@ -60,11 +62,12 @@ public class SeriesTrackerProcessor implements Processor {
 		final String omdbKey = SpringStart.getProp().getProperty("tracker.omdb.key");
 		final OMDBAPI omdbAPI = (omdbKey != null) ? new OMDBAPI(omdbKey) : null;
 		
-		final List<AutoPollSeries> series = AutoPollSeries.Queries.getAllByActive(true);
+		List<AutoPollSeries> series = AutoPollSeries.Queries.getAllByActive(true);
 		
 		Map<Integer, Set<Integer>> baseMissingMap;
 		Map<Integer, Set<Integer>> missingMap;
 		Map<Integer, Set<Integer>> seasonMap;
+		List<AutoPollDownload> toDelete = new ArrayList<>();
 		Set<Integer> eps;
 		int maxSeasonNum;
 		SeriesResult omdb;
@@ -75,10 +78,27 @@ public class SeriesTrackerProcessor implements Processor {
 			
 			for (final AutoPollDownload download : item.getActiveDownloads()) {
 				eps = item.getSeasonMap().getOrDefault(download.getSeason(), new HashSet<>());
+				if (eps.contains(download.getEpisode())) {
+					toDelete.add(download);
+				}
+			}
+			
+			for (final AutoPollDownload download : toDelete) {
+				ProcessUtils.getEm().remove(download);
+			}
+		}
+		
+		series = AutoPollSeries.Queries.getAllByActive(true);
+		
+		for (final AutoPollSeries item : series) {
+			LOG.info("Polling :" + item.getTitle());
+			
+			for (final AutoPollDownload download : item.getActiveDownloads()) {
+				eps = item.getSeasonMap().getOrDefault(download.getSeason(), new HashSet<>());
 				if (download.getEpisode() != 0) {
 					eps.add(download.getEpisode());
 				} else {
-					for (int i = 0; i <= MAX_EP; i++) {
+					for (int i = 1; i <= MAX_EP; i++) {
 						eps.add(i);
 					}
 				}
