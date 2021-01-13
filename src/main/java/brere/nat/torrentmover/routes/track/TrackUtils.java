@@ -166,11 +166,12 @@ public class TrackUtils {
 		if (torrents != null && !torrents.isEmpty()) {
 			Matcher match;
 			AutoPollDownload downloaded;
+			boolean started = false;
 			for (TorrentResult torrent : torrents) {
 				LOG.info("Title :" + torrent.getTitle());
 				match = FileUtils.EPISODEPATTERN.matcher(torrent.getTitle());
 				LOG.info("Ep Number :" + epNum);
-				if (epNum != 0 && !match.find() && torrent.getSeeders() > 2) {
+				if (epNum != 0 && !match.find()) {
 					LOG.info("Found torrent, uploading to rpc");
 					rpcAPI.addTorrent(torrent.getDownload());
 					
@@ -179,7 +180,12 @@ public class TrackUtils {
 					downloaded.setEpisode(epNum);
 					em.persist(downloaded);
 					LOG.info("Saving AutoPollDownload");
+					started = true;
 				}
+			}
+			
+			if (!started) {
+				throw new TorrentNotFoundException("No Torrents found");
 			}
 			
 		} else {
