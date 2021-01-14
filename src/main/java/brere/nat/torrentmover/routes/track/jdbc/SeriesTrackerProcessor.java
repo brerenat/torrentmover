@@ -22,8 +22,8 @@ public class SeriesTrackerProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		final AutoPollSeries item = exchange.getIn().getBody(AutoPollSeries.class);
+		LOG.info("Starting to auto Poll Series");
 		if (item != null) {
-			LOG.info("Starting to auto Poll Series");
 			final String torrentName = SpringStart.getProp().getProperty("tracker.torrent.name");
 			final TorrentAPI torrentAPI = new TorrentAPI(torrentName);
 			final String rpcHost = SpringStart.getProp().getProperty("tracker.rpc.hostname");

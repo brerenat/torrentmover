@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -58,7 +59,11 @@ public class SeriesTrackerProcessor implements Processor {
 		final EntityManager em = SpringStart.getEm();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
-		List<AutoPollSeries> series = AutoPollSeries.Queries.getAllByActive(true, em);
+
+		final TypedQuery<AutoPollSeries> getAllActive = em.createNamedQuery("AutoPollSeries_getAllByActive", AutoPollSeries.class);
+		getAllActive.setParameter("active", true);
+		
+		List<AutoPollSeries> series = getAllActive.getResultList();
 		
 		List<AutoPollDownload> toDelete = new ArrayList<>();
 		Set<Integer> eps;
@@ -79,7 +84,9 @@ public class SeriesTrackerProcessor implements Processor {
 			}
 		}
 		
-		series = AutoPollSeries.Queries.getAllByActive(true, em);
+		em.flush();
+		
+		series = getAllActive.getResultList();
 		
 		for (final AutoPollSeries item : series) {
 			TrackUtils.pollSeries(torrentAPI, rpcAPI, omdbAPI, item, em);

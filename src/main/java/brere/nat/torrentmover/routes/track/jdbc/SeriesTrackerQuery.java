@@ -3,6 +3,7 @@ package brere.nat.torrentmover.routes.track.jdbc;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -19,16 +20,20 @@ public class SeriesTrackerQuery implements Processor {
 	@Override
 	public void process(final Exchange exchange) throws Exception {
 		LOG.info("Starting to auto Poll Series");
+		final EntityManager em = SpringStart.getEm();
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
 		try {
-			final EntityManager em = SpringStart.getEm();
-			EntityTransaction transaction = em.getTransaction();
-			transaction.begin();
-			final AutoPollSeries series = AutoPollSeries.Queries.getAllByStartPoll(true, em);
+			final TypedQuery<AutoPollSeries> getAllActive = em.createNamedQuery("AutoPollSeries_getAllByStartPoll", AutoPollSeries.class);
+			getAllActive.setParameter("startPoll", true);
+			
+			final AutoPollSeries series = getAllActive.getSingleResult();
 			series.setStartPoll(false);
-			transaction.commit();
 			exchange.getOut().setBody(series, AutoPollSeries.class);
 		} catch (NoResultException e) {
 			LOG.debug("Nothing to Start Poll");
+		} finally {
+			transaction.commit();
 		}
 		
 	}
