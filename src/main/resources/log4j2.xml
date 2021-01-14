@@ -10,7 +10,7 @@
 	    filePattern="application.%d{dd-MMM}.log.gz"
 	    ignoreExceptions="false">
 	    <PatternLayout>
-	        <Pattern>%d{dd-MM-yyyy HH:mm:ss} %-5p %m%n</Pattern>
+	        <Pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p %c{1}:%L - %m%n</Pattern>
 	    </PatternLayout>
 	    <Policies>
 	        <TimeBasedTriggeringPolicy interval="1"/>
