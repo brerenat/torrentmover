@@ -38,6 +38,9 @@ public class SeriesTrackerProcessor implements Processor {
 			final OMDBAPI omdbAPI = (omdbKey != null) ? new OMDBAPI(omdbKey) : null;
 			final EntityManager em = SpringStart.getEm();
 			EntityTransaction transaction = em.getTransaction();
+			
+			item.setSeasonMap(TrackUtils.updateSeasonMapFromFileSystem(item.getFolderName()));
+			
 			transaction.begin();
 			TrackUtils.pollSeries(torrentAPI, rpcAPI, omdbAPI, item, em);
 			transaction.commit();

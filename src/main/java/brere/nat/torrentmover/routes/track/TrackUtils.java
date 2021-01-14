@@ -2,12 +2,20 @@ package brere.nat.torrentmover.routes.track;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import javax.persistence.EntityManager;
 
@@ -33,6 +41,7 @@ public class TrackUtils {
 	private static final int MAX_SN = 20;
 	private static final String TEN_EIGHTY = "*1080";
 	private static final String SEVEN_TWENTY = "*720";
+	private static final String EE = "[Ee]";
 	
 	public static void pollSeries(final TorrentAPI torrentAPI, final RPCAPI rpcAPI, final OMDBAPI omdbAPI,
 			final AutoPollSeries item, final EntityManager em)
@@ -239,6 +248,80 @@ public class TrackUtils {
 		}
 		
 		return map;
+	}
+	
+	/**
+	 * 
+	 * @param item
+	 * @throws IOException
+	 */
+	public static Map<Integer, Set<Integer>> updateSeasonMapFromFileSystem(final String folder) throws Exception {
+		final Map<Integer, Set<Integer>> seasonMap = new HashMap<>();
+		int seasonNum;
+		int epNum;
+		Matcher matches;
+		Set<Integer> eps;
+		String seasonName;
+		String episodeName;
+		String fileName;
+		final Path seriesFolder = Paths.get(folder);
+		if (!Files.exists(seriesFolder)) {
+			Files.createDirectories(seriesFolder);
+			setPermissions(seriesFolder);
+		}
+		
+		LOG.info("Series dir :" + seriesFolder);
+		try (final DirectoryStream<Path> dirs = Files.newDirectoryStream(seriesFolder)) {
+			for (final Path seasonDir : dirs) {
+				seasonName = seasonDir.getFileName().toString();
+				LOG.info("Folder :" + seasonName);
+				if (seasonName.startsWith("Season ")) {
+					LOG.info("Is Season");
+					seasonNum = Integer.valueOf(seasonName.toString().replace("Season ", ""));
+					LOG.info("Season Number :" + seasonNum);
+					try (final DirectoryStream<Path> files = Files.newDirectoryStream(seasonDir)) {
+						for (final Path file : files) {
+							fileName = file.getFileName().toString();
+							LOG.info("File under " + seasonName + " :" + fileName);
+							matches = FileUtils.EP_ONLY_PATTERN.matcher(fileName);
+							LOG.info("Trying Match");
+							if (matches.find()) {
+								episodeName = matches.group();
+								LOG.info("Found Match :" + episodeName);
+								epNum = Integer.valueOf(episodeName.replaceAll(EE, ""));
+								eps = seasonMap.getOrDefault(seasonNum, new HashSet<>());
+								eps.add(epNum);
+								seasonMap.put(seasonNum, eps);
+							}
+						}
+					}
+				}
+			}
+		}
+		LOG.info("Out Season Map :" + seasonMap);
+		return seasonMap;
+	}
+
+	/**
+	 * 
+	 * @param seriesFolder
+	 * @throws IOException
+	 */
+	private static void setPermissions(Path seriesFolder) throws IOException {
+		if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+			final Set<PosixFilePermission> perms = Files.readAttributes(seriesFolder, PosixFileAttributes.class).permissions();
+			
+		    perms.add(PosixFilePermission.OWNER_WRITE);
+		    perms.add(PosixFilePermission.OWNER_READ);
+		    perms.add(PosixFilePermission.OWNER_EXECUTE);
+		    perms.add(PosixFilePermission.GROUP_WRITE);
+		    perms.add(PosixFilePermission.GROUP_READ);
+		    perms.add(PosixFilePermission.GROUP_EXECUTE);
+		    perms.add(PosixFilePermission.OTHERS_WRITE);
+		    perms.add(PosixFilePermission.OTHERS_READ);
+		    perms.add(PosixFilePermission.OTHERS_EXECUTE);
+		    Files.setPosixFilePermissions(seriesFolder, perms);
+		}
 	}
 
 }
