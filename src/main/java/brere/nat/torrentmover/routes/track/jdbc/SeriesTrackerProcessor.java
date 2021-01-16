@@ -26,6 +26,7 @@ public class SeriesTrackerProcessor implements Processor {
 		if (item != null) {
 			final String torrentName = SpringStart.getProp().getProperty("tracker.torrent.name");
 			final TorrentAPI torrentAPI = new TorrentAPI(torrentName);
+			torrentAPI.setMinSeeders(3);
 			final String rpcHost = SpringStart.getProp().getProperty("tracker.rpc.hostname");
 			final RPCAPI rpcAPI;
 			if (rpcHost != null) {
