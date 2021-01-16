@@ -34,6 +34,7 @@ public class SeriesTrackerQuery implements Processor {
 			LOG.debug("Nothing to Start Poll");
 		} finally {
 			transaction.commit();
+			em.close();
 		}
 		
 	}

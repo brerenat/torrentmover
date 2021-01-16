@@ -44,6 +44,7 @@ public class SeriesTrackerProcessor implements Processor {
 			transaction.begin();
 			TrackUtils.pollSeries(torrentAPI, rpcAPI, omdbAPI, item, em);
 			transaction.commit();
+			em.close();
 		}
 	}
 

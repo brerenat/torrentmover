@@ -80,6 +80,7 @@ public class SeriesTrackerProcessor implements Processor {
 		}
 		
 		transaction.commit();
+		em.close();
 	}
 	
 }
