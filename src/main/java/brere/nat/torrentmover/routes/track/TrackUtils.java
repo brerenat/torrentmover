@@ -80,7 +80,9 @@ public class TrackUtils {
 		baseMissingMap = getBaseMissingMap(maxSeasonNum, MAX_EP);
 		missingMap = new HashMap<>();
 		for (final Entry<Integer, Set<Integer>> entry : baseMissingMap.entrySet()) {
-			if (!seasonMap.containsKey(entry.getKey())) {
+			if (item.getSeasonFrom() >= entry.getKey()) {
+				LOG.info("Not searching for Season :" + entry.getKey());
+			} else if (!seasonMap.containsKey(entry.getKey())) {
 				// Don't have this season
 				LOG.info("Don't have season " + entry.getKey());
 				missingMap.put(entry.getKey(), entry.getValue());
