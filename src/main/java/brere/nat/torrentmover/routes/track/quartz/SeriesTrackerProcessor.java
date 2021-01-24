@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import brere.nat.mydb.model.AutoPollDownload;
 import brere.nat.mydb.model.AutoPollSeries;
-import brere.nat.mydb.utils.ProcessUtils;
 import brere.nat.omdbapi.api.OMDBAPI;
 import brere.nat.torrent.api.TorrentAPI;
 import brere.nat.torrentmover.SpringStart;
@@ -65,10 +64,6 @@ public class SeriesTrackerProcessor implements Processor {
 				if (eps.contains(download.getEpisode())) {
 					toDelete.add(download);
 				}
-			}
-			
-			for (final AutoPollDownload download : toDelete) {
-				ProcessUtils.getEm().remove(download);
 			}
 		}
 		
