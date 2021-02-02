@@ -24,7 +24,7 @@ public class SeriesTrackerQuery implements Processor {
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
 		try {
-			final TypedQuery<AutoPollSeries> getAllActive = em.createNamedQuery("AutoPollSeries_getAllByStartPoll", AutoPollSeries.class);
+			final TypedQuery<AutoPollSeries> getAllActive = em.createNamedQuery("AutoPollSeries.getAllByStartPoll", AutoPollSeries.class);
 			getAllActive.setParameter("startPoll", true);
 			
 			final AutoPollSeries series = getAllActive.getSingleResult();
