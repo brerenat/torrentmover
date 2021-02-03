@@ -149,15 +149,17 @@ public class TrackUtils {
 				LOG.info("Searching episode :" + getSeasonEpisodeString(entry.getKey(), episode, null));
 				try {
 					getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, SEVEN_TWENTY), entry.getKey(), episode, em);
+					counter = 0;
 				} catch (TorrentNotFoundException e) {
 					LOG.warn("Couldn't find a torrent for " + item.getTitle() + " " + getSeasonEpisodeString(entry.getKey(), episode, SEVEN_TWENTY));
-					
 					try {
 						getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, TEN_EIGHTY), entry.getKey(), episode, em);
+						counter = 0;
 					} catch (TorrentNotFoundException e2) {
 						LOG.warn("Couldn't find a torrent for " + item.getTitle() + " " + getSeasonEpisodeString(entry.getKey(), episode, TEN_EIGHTY));
 						try {
 							getTorrent(torrentAPI, rpcAPI, item, getSeasonEpisodeString(entry.getKey(), episode, null), entry.getKey(), episode, em);
+							counter = 0;
 						} catch (TorrentNotFoundException e3) {
 							LOG.warn("Couldn't find a torrent for " + item.getTitle() + " " + getSeasonEpisodeString(entry.getKey(), episode, null));
 							counter++;
